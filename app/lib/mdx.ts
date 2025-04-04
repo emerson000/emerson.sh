@@ -47,6 +47,7 @@ export function getPostBySlug(slug: string): Post | null {
 
     return post;
   } catch (e) {
+    console.error(e);
     return null;
   }
 } 

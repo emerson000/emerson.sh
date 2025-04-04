@@ -1,0 +1,16 @@
+/* Custom styles for highlight.js */
+pre.hljs {
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  background-color: #0d1117 !important; /* GitHub Dark theme background */
+  color: #c9d1d9 !important; /* GitHub Dark theme text color */
+}
+
+code.hljs {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 0 !important;
+  background: none !important;
+} 

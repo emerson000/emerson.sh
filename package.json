@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/highlight.js": "^9.12.4",
     "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
     "next": "15.2.4",
     "next-mdx-remote": "^5.0.0",
     "react": "^19.0.0",

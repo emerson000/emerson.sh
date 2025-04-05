@@ -10,8 +10,12 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function ContentTypePage({ params }: { params: { contentType: string } }) {
-  const { contentType } = params;
+type PageProps = {
+  params: Promise<{ contentType: string }>;
+};
+
+export default async function ContentTypePage({ params }: PageProps) {
+  const { contentType } = await params;
   const posts = getAllPosts(contentType);
 
   if (!posts.length) {

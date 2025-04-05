@@ -20,12 +20,12 @@ export async function generateStaticParams() {
   return params;
 }
 
-export default async function ContentPage({ 
-  params 
-}: { 
-  params: { contentType: string; slug: string } 
-}) {
-  const { contentType, slug } = params;
+type PageProps = {
+  params: Promise<{ contentType: string; slug: string }>;
+};
+
+export default async function ContentPage({ params }: PageProps) {
+  const { contentType, slug } = await params;
   const post = getPostBySlug(slug, contentType);
 
   if (!post) {

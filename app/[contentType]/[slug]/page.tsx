@@ -1,17 +1,32 @@
-import { getPostBySlug, getAllPosts } from '../../lib/mdx';
+import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
 import { MDXProvider } from '../../components/mdx/MDXProvider';
+import { ContentBreadcrumb } from '../../components/ContentBreadcrumb';
 
 export async function generateStaticParams() {
-  const posts = getAllPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  const contentTypes = getContentTypes();
+  const params = [];
+
+  for (const type of contentTypes) {
+    const posts = getAllPosts(type.name);
+    for (const post of posts) {
+      params.push({
+        contentType: type.name,
+        slug: post.slug,
+      });
+    }
+  }
+
+  return params;
 }
 
-export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
+export default async function ContentPage({ 
+  params 
+}: { 
+  params: { contentType: string; slug: string } 
+}) {
+  const { contentType, slug } = params;
+  const post = getPostBySlug(slug, contentType);
 
   if (!post) {
     notFound();
@@ -19,6 +34,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="max-w-4xl mx-auto px-4 py-8">
+      <ContentBreadcrumb contentType={contentType} post={post} />
       <header className="mb-8">
         <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
         <time className="text-gray-500">

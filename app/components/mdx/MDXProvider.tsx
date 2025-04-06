@@ -27,7 +27,7 @@ const components = {
   blockquote: htmlComponent('blockquote', 'border-l-2 border-gray-300 pl-4 py-2 italic'),
   a: htmlComponent('a', 'text-blue-500 hover:underline'),
   img: CustomImage,
-  
+  code: htmlComponent('code', 'bg-gray-100 p-1 rounded dark:bg-gray-800'),
 };
 
 type MDXProviderProps = {

@@ -7,13 +7,15 @@
     "dev": "concurrently \"npm run copy-content-images:watch\" \"next dev --turbopack\"",
     "copy-content-images": "node scripts/copy-content-images.js",
     "copy-content-images:watch": "node scripts/copy-content-images.js --watch",
-    "build": "npm run copy-content-images && next build",
+    "generate-icons": "node scripts/generate-icons.js",
+    "build": "npm run copy-content-images && npm run generate-icons && next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
     "@types/highlight.js": "^9.12.4",
+    "canvas": "^3.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",

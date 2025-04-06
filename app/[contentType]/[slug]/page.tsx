@@ -2,6 +2,38 @@ import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
 import { MDXProvider } from '../../components/mdx/MDXProvider';
 import { ContentBreadcrumb } from '../../components/ContentBreadcrumb';
+import { Metadata } from 'next';
+
+// Function to extract image URLs from MDX content
+function extractImagesFromMDX(content: string): string[] {
+  const imageRegex = /!\[.*?\]\((.*?)\)/g;
+  const matches = [...content.matchAll(imageRegex)];
+  return matches.map(match => match[1]);
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ contentType: string; slug: string }> }): Promise<Metadata> {
+  const { contentType, slug } = await params;
+  const post = getPostBySlug(slug, contentType);
+  
+  if (!post) {
+    return {
+      title: 'Not Found',
+    };
+  }
+
+  const images = extractImagesFromMDX(post.content);
+  
+  return {
+    title: `${post.title} | ${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`,
+    description: post.excerpt || `Read about ${post.title} in our ${contentType} section`,
+    openGraph: {
+      images: images.map(src => ({
+        url: src.startsWith('http') ? src : `/${src.startsWith('/') ? src.slice(1) : src}`,
+        alt: post.title,
+      })),
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const contentTypes = getContentTypes();

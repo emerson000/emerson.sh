@@ -2,6 +2,25 @@ import { getAllPosts, getContentTypes } from '../lib/mdx';
 import { BlogCard } from '../components/BlogCard';
 import { ContentBreadcrumb } from '../components/ContentBreadcrumb';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ contentType: string }> }): Promise<Metadata> {
+  const { contentType } = await params;
+  const posts = getAllPosts(contentType);
+  
+  if (!posts.length) {
+    return {
+      title: 'Not Found',
+    };
+  }
+  
+  const capitalizedContentType = contentType.charAt(0).toUpperCase() + contentType.slice(1);
+  
+  return {
+    title: `${capitalizedContentType} | emerson`,
+    description: `Browse ${contentType}`,
+  };
+}
 
 export async function generateStaticParams() {
   const contentTypes = getContentTypes();

@@ -5,23 +5,29 @@ import { cn } from '@/lib/utils';
 interface CustomImageProps {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
   className?: string;
+  aspectRatio?: string;
 }
 
-export function CustomImage({ src, alt, width, height, className }: CustomImageProps) {
+export function CustomImage({ 
+  src, 
+  alt, 
+  className,
+  aspectRatio = '16/9',
+}: CustomImageProps) {
   // If the src is an external URL, use it directly
   if (src.startsWith('http://') || src.startsWith('https://')) {
     return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width || 800}
-        height={height || 600}
-        className={cn('rounded-md', className)}
-        unoptimized
-      />
+      <span className="relative block w-full my-4" style={{ aspectRatio: aspectRatio }}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className={cn('rounded-md object-cover', className)}
+          unoptimized
+          sizes="100vw"
+        />
+      </span>
     );
   }
 
@@ -32,12 +38,17 @@ export function CustomImage({ src, alt, width, height, className }: CustomImageP
   // Use a relative path instead of an absolute path to avoid Next.js routing issues
   // This will look for images in the public directory
   return (
-    <Image
-      src={`/${cleanSrc}`}
-      alt={alt}
-      width={width || 800}
-      height={height || 600}
-      className={cn('rounded-md', className)}
-    />
+    <span className="relative block w-full my-4" style={{ aspectRatio: aspectRatio }}>
+      <Image
+        src={`/${cleanSrc}`}
+        alt={alt}
+        fill
+        className={cn('rounded-md object-cover', className)}
+        sizes="100vw"
+        quality={90}
+        priority={false}
+        loading="lazy"
+      />
+    </span>
   );
 } 

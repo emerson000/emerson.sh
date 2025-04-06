@@ -2,9 +2,12 @@
   "name": "emerson.sh",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "concurrently \"npm run copy-content-images:watch\" \"next dev --turbopack\"",
+    "copy-content-images": "node scripts/copy-content-images.js",
+    "copy-content-images:watch": "node scripts/copy-content-images.js --watch",
+    "build": "npm run copy-content-images && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -30,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^8.2.2",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4",

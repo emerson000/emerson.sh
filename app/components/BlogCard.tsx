@@ -22,7 +22,7 @@ export function BlogCard({ post }: BlogCardProps) {
 
   return (
     <Link href={`/${post.contentType}/${post.slug}`}>
-      <Card className="h-full transition-all hover:shadow-md">
+      <Card className="h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1">
         <CardHeader>
           <CardTitle className="text-2xl">{post.title}</CardTitle>
         </CardHeader>

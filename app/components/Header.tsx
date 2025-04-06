@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getContentTypes } from '../lib/mdx';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   const contentTypes = getContentTypes();
@@ -11,7 +12,7 @@ export function Header() {
           <Link href="/" className="text-xl font-bold">
             Home
           </Link>
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             {contentTypes.map((type) => (
               <Link
                 key={type.name}
@@ -21,6 +22,9 @@ export function Header() {
                 {type.name}
               </Link>
             ))}
+            <div className="relative">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </nav>

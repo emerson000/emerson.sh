@@ -4,7 +4,7 @@
 import { cn } from "@/lib/utils";
 import localFont from "next/font/local";
 
-const logoFont = localFont({
+export const logoFont = localFont({
     src: "../fonts/ModernSans.woff2",
     style: "normal",
     weight: "100",

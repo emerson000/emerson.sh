@@ -30,7 +30,7 @@ export function CodeBlock({ children, language = "javascript" }: { children: Rea
     }).value;
 
     return (
-        <pre className={`hljs rounded-md p-4 my-4 overflow-x-auto bg-gray-100 dark:bg-gray-800`}>
+        <pre className={`hljs rounded-md p-4 my-4 overflow-x-auto bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700`}>
             <code 
                 className={`hljs language-${language} font-mono text-sm`}
                 dangerouslySetInnerHTML={{ __html: highlighted }}

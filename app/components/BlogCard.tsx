@@ -8,17 +8,14 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
+import moment from 'moment';
 
 interface BlogCardProps {
   post: Post;
 }
 
 export function BlogCard({ post }: BlogCardProps) {
-  const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = moment.utc(post.date).format('MMMM D, YYYY');
 
   return (
     <Link href={`/${post.contentType}/${post.slug}`}>

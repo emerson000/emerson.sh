@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import moment from 'moment';
 
 const contentDirectory = path.join(process.cwd(), 'content');
 
@@ -81,7 +82,8 @@ export function getAllPosts(contentType?: string): Post[] {
     allPostsData.push(...typePosts);
   }
 
-  return allPostsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedPosts = allPostsData.sort((a, b) => moment.utc(b.date).diff(moment.utc(a.date)));
+  return sortedPosts;
 }
 
 export function getPostBySlug(slug: string, contentType?: string): Post | null {

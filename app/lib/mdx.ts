@@ -59,7 +59,7 @@ export function getAllPosts(contentType?: string): Post[] {
     allPostsData.push(...typePosts);
   }
 
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return allPostsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 export function getPostBySlug(slug: string, contentType?: string): Post | null {

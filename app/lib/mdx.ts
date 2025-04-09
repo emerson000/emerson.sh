@@ -9,6 +9,7 @@ export type ContentType = {
   name: string;
   path: string;
   order: number;
+  nav?: boolean;
 };
 
 export type Post = {
@@ -27,6 +28,7 @@ export function getContentTypes(): ContentType[] {
       const typeName = dirent.name;
       const indexPath = path.join(contentDirectory, typeName, '_index.mdx');
       let order = 999; // Default high order for types without _index.mdx
+      let nav = true; // Default to showing in nav
       
       // Check if _index.mdx exists and read its frontmatter
       if (fs.existsSync(indexPath)) {
@@ -36,6 +38,9 @@ export function getContentTypes(): ContentType[] {
           if (data.order !== undefined) {
             order = data.order;
           }
+          if (data.nav !== undefined) {
+            nav = data.nav;
+          }
         } catch (error) {
           console.error(`Error reading _index.mdx for ${typeName}:`, error);
         }
@@ -44,9 +49,11 @@ export function getContentTypes(): ContentType[] {
       return {
         name: typeName,
         path: `/content/${typeName}`,
-        order
+        order,
+        nav
       };
-    });
+    })
+    .filter(type => type.nav !== false); // Filter out content types where nav is false
   
   // Sort content types by order
   return contentTypes.sort((a, b) => a.order - b.order);
@@ -59,6 +66,25 @@ export function getAllPosts(contentType?: string): Post[] {
   for (const type of contentTypes) {
     const typeDirectory = path.join(contentDirectory, type);
     if (!fs.existsSync(typeDirectory)) continue;
+
+    // Check if _index.mdx exists and read its frontmatter for show_in_recent
+    const indexPath = path.join(typeDirectory, '_index.mdx');
+    let showInRecent = true; // Default to showing in recent
+    
+    if (fs.existsSync(indexPath)) {
+      try {
+        const fileContents = fs.readFileSync(indexPath, 'utf8');
+        const { data } = matter(fileContents);
+        if (data.show_in_recent !== undefined) {
+          showInRecent = data.show_in_recent;
+        }
+      } catch (error) {
+        console.error(`Error reading _index.mdx for ${type}:`, error);
+      }
+    }
+
+    // Skip this content type if show_in_recent is false
+    if (!showInRecent) continue;
 
     const fileNames = fs.readdirSync(typeDirectory);
     const typePosts = fileNames

@@ -8,13 +8,15 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import moment from 'moment';
 
 interface BlogCardProps {
   post: Post;
+  includeSectionBadges?: boolean;
 }
 
-export function BlogCard({ post }: BlogCardProps) {
+export function BlogCard({ post, includeSectionBadges = false }: BlogCardProps) {
   const formattedDate = moment.utc(post.date).format('MMMM D, YYYY');
 
   return (
@@ -30,8 +32,13 @@ export function BlogCard({ post }: BlogCardProps) {
             </CardDescription>
           )}
         </CardContent>
-        <CardFooter className="text-sm text-muted-foreground">
-          {formattedDate}
+        <CardFooter className="text-sm text-muted-foreground flex justify-between items-center">
+          <span>{formattedDate}</span>
+          {includeSectionBadges && (
+            <Badge variant="secondary" className="capitalize">
+              {post.contentType}
+            </Badge>
+          )}
         </CardFooter>
       </Card>
     </Link>

@@ -30,7 +30,7 @@ $ rm ~/.bash_history
           <h1 className="text-2xl font-bold mb-4">Recent</h1>
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             {recentPosts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
+              <BlogCard key={post.slug} post={post} includeSectionBadges={true} />
             ))}
           </div>
         </section>

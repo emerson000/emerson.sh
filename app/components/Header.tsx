@@ -3,6 +3,7 @@ import { getContentTypes } from '../lib/mdx';
 import { ThemeToggle } from './ThemeToggle';
 import Logo from './Logo';
 import { House } from 'lucide-react';
+import { MobileMenu } from './MobileMenu';
 
 export function Header() {
   const contentTypes = getContentTypes();
@@ -11,8 +12,9 @@ export function Header() {
     <header className="border-b">
       <nav className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-            <Logo />
-          <div className="flex items-center gap-6">
+          <Logo />
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-sm font-medium p-2 hover:bg-accent rounded-md hover:text-primary transition-colors capitalize">
               <House className="w-5 h-5" />
             </Link>
@@ -29,6 +31,9 @@ export function Header() {
               <ThemeToggle />
             </div>
           </div>
+
+          {/* Mobile Navigation */}
+          <MobileMenu contentTypes={contentTypes} />
         </div>
       </nav>
     </header>

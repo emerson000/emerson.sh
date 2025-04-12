@@ -69,13 +69,15 @@ export default async function ContentPage({ params }: PageProps) {
       <ContentBreadcrumb contentType={contentType} post={post} />
       <header className="mb-8">
         <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
-        <time className="text-gray-500">
-          {new Date(post.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </time>
+        {post.show_dates !== false && (
+          <time className="text-gray-500">
+            {new Date(post.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        )}
       </header>
       <div className="prose prose-lg max-w-none">
         <MDXProvider source={post.content} />

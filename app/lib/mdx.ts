@@ -19,6 +19,7 @@ export type Post = {
   content: string;
   excerpt?: string;
   contentType: string;
+  show_dates?: boolean;
 };
 
 export function getContentTypes(): ContentType[] {
@@ -67,9 +68,10 @@ export function getAllPosts(contentType?: string): Post[] {
     const typeDirectory = path.join(contentDirectory, type);
     if (!fs.existsSync(typeDirectory)) continue;
 
-    // Check if _index.mdx exists and read its frontmatter for show_in_recent
+    // Check if _index.mdx exists and read its frontmatter for show_in_recent and show_dates
     const indexPath = path.join(typeDirectory, '_index.mdx');
     let showInRecent = true; // Default to showing in recent
+    let showDates = true; // Default to showing dates
     
     if (fs.existsSync(indexPath)) {
       try {
@@ -77,6 +79,9 @@ export function getAllPosts(contentType?: string): Post[] {
         const { data } = matter(fileContents);
         if (data.show_in_recent !== undefined) {
           showInRecent = data.show_in_recent;
+        }
+        if (data.show_dates !== undefined) {
+          showDates = data.show_dates;
         }
       } catch (error) {
         console.error(`Error reading _index.mdx for ${type}:`, error);
@@ -101,7 +106,8 @@ export function getAllPosts(contentType?: string): Post[] {
           date: data.date,
           content,
           excerpt: data.excerpt,
-          contentType: type
+          contentType: type,
+          show_dates: showDates
         };
       });
 

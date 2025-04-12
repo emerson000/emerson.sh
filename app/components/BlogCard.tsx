@@ -33,7 +33,7 @@ export function BlogCard({ post, includeSectionBadges = false }: BlogCardProps) 
           )}
         </CardContent>
         <CardFooter className="text-sm text-muted-foreground flex justify-between items-center">
-          <span>{formattedDate}</span>
+          {post.show_dates !== false ? <span>{formattedDate}</span> : <div></div>}
           {includeSectionBadges && (
             <Badge variant="secondary" className="capitalize">
               {post.contentType}

@@ -6,7 +6,7 @@ import { House } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
 
 export function Header() {
-  const contentTypes = getContentTypes();
+  const contentTypes = getContentTypes({ filterNav: true });
 
   return (
     <header className="border-b dark:bg-zinc-950">

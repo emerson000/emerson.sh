@@ -22,15 +22,15 @@ export type Post = {
   show_dates?: boolean;
 };
 
-export function getContentTypes(): ContentType[] {
-  const contentTypes = fs.readdirSync(contentDirectory, { withFileTypes: true })
+export function getContentTypes({ filterNav = false }: { filterNav?: boolean } = {}): ContentType[] {
+  let contentTypes = fs.readdirSync(contentDirectory, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => {
       const typeName = dirent.name;
       const indexPath = path.join(contentDirectory, typeName, '_index.mdx');
       let order = 999; // Default high order for types without _index.mdx
-      let nav = true; // Default to showing in nav
-      
+      let nav = false; // Default to showing in nav
+
       // Check if _index.mdx exists and read its frontmatter
       if (fs.existsSync(indexPath)) {
         try {
@@ -46,16 +46,17 @@ export function getContentTypes(): ContentType[] {
           console.error(`Error reading _index.mdx for ${typeName}:`, error);
         }
       }
-      
       return {
         name: typeName,
         path: `/content/${typeName}`,
         order,
         nav
       };
-    })
-    .filter(type => type.nav !== false); // Filter out content types where nav is false
-  
+    });
+  if (filterNav) {
+    contentTypes = contentTypes.filter(type => type.nav !== false);
+  }
+
   // Sort content types by order
   return contentTypes.sort((a, b) => a.order - b.order);
 }
@@ -72,7 +73,7 @@ export function getAllPosts(contentType?: string): Post[] {
     const indexPath = path.join(typeDirectory, '_index.mdx');
     let showInRecent = true; // Default to showing in recent
     let showDates = true; // Default to showing dates
-    
+
     if (fs.existsSync(indexPath)) {
       try {
         const fileContents = fs.readFileSync(indexPath, 'utf8');
@@ -122,7 +123,7 @@ export function getPostBySlug(slug: string, contentType?: string): Post | null {
   try {
     const posts = getAllPosts(contentType);
     const post = posts.find((p) => p.slug === slug);
-    
+
     if (!post) {
       return null;
     }

@@ -28,7 +28,7 @@
             "name": "Next.js: Build",
             "type": "node-terminal",
             "request": "launch",
-            "command": "npm run build && python -m http.server -d out"
+            "command": "npm run build"
         },
         {
             "name": "Python: Serve Static Site",

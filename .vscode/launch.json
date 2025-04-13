@@ -5,10 +5,52 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Next.js: debug server-side",
+            "name": "Debug: Firefox",
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "webpack:///",
+                    "path": "${workspaceFolder}/"
+                }
+            ]
+        },
+        {
+            "name": "Next.js: Run Dev",
             "type": "node-terminal",
             "request": "launch",
             "command": "npm run dev"
         },
+        {
+            "name": "Next.js: Build",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run build && python -m http.server -d out"
+        },
+        {
+            "name": "Python: Serve Static Site",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "python -m http.server -d out"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug: Full Stack",
+            "configurations": [
+                "Next.js: Run Dev",
+                "Debug: Firefox"
+            ]
+        },
+        {
+            "name": "Build and Serve",
+            "configurations": [
+                "Next.js: Build",
+                "Python: Serve Static Site"
+            ]
+        }
     ]
 }

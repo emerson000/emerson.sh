@@ -1,4 +1,4 @@
-import { getAllPosts, getContentTypes } from '../lib/mdx';
+import { getAllPosts } from '../lib/mdx';
 import { BlogCard } from '../components/BlogCard';
 import { ContentBreadcrumb } from '../components/ContentBreadcrumb';
 import { TagBadge } from '../components/TagBadge';
@@ -7,6 +7,15 @@ import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ contentType: string }> }): Promise<Metadata> {
   const { contentType } = await params;
+  
+  // Handle the empty content type case
+  if (contentType === 'empty') {
+    return {
+      title: 'No Content Available | emerson',
+      description: 'No content types are available at this time.',
+    };
+  }
+  
   const posts = getAllPosts(contentType);
   
   if (!posts.length) {
@@ -24,10 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  const contentTypes = getContentTypes();
-  return contentTypes.map((type) => ({
-    contentType: type.name,
-  }));
+  // Always return at least one path to satisfy Next.js static export requirements
+  return [
+    { contentType: 'empty' }
+  ];
 }
 
 type PageProps = {
@@ -36,6 +45,18 @@ type PageProps = {
 
 export default async function ContentTypePage({ params }: PageProps) {
   const { contentType } = await params;
+  
+  // Handle the empty content type case
+  if (contentType === 'empty') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-4">No Content Available</h1>
+        <p className="text-lg mb-4">There are no content types available at this time.</p>
+        <p>Please add content to the content directory to see it displayed here.</p>
+      </div>
+    );
+  }
+  
   const posts = getAllPosts(contentType);
 
   if (!posts.length) {

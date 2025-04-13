@@ -1,4 +1,4 @@
-import { getAllPosts, getContentTypes } from '../../../lib/mdx';
+import { getAllPosts } from '../../../lib/mdx';
 import { BlogCard } from '../../../components/BlogCard';
 import { ContentBreadcrumb } from '../../../components/ContentBreadcrumb';
 import { notFound } from 'next/navigation';
@@ -6,6 +6,15 @@ import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ contentType: string; tag: string }> }): Promise<Metadata> {
   const { contentType, tag } = await params;
+  
+  // Handle the empty content type and tag case
+  if (contentType === 'empty' && tag === 'empty') {
+    return {
+      title: 'No Tags Available | emerson',
+      description: 'No tags are available at this time.',
+    };
+  }
+  
   const posts = getAllPosts(contentType, tag);
   
   if (!posts.length) {
@@ -24,28 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  const contentTypes = getContentTypes();
-  const params: Array<{ contentType: string; tag: string }> = [];
-
-  for (const type of contentTypes) {
-    const posts = getAllPosts(type.name);
-    const tags = new Set<string>();
-    
-    // Collect all unique tags
-    posts.forEach(post => {
-      post.tags?.forEach(tag => tags.add(tag));
-    });
-
-    // Generate params for each tag
-    tags.forEach(tag => {
-      params.push({
-        contentType: type.name,
-        tag: tag.toLowerCase(),
-      });
-    });
-  }
-
-  return params;
+  // Always return at least one path to satisfy Next.js static export requirements
+  return [
+    { contentType: 'empty', tag: 'empty' }
+  ];
 }
 
 type PageProps = {
@@ -54,6 +45,18 @@ type PageProps = {
 
 export default async function TagPage({ params }: PageProps) {
   const { contentType, tag } = await params;
+  
+  // Handle the empty content type and tag case
+  if (contentType === 'empty' && tag === 'empty') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-4">No Tags Available</h1>
+        <p className="text-lg mb-4">There are no tags available at this time.</p>
+        <p>Please add content with tags to see them displayed here.</p>
+      </div>
+    );
+  }
+  
   // Convert URL tag to lowercase for consistency
   const lowercaseTag = tag.toLowerCase();
   const posts = getAllPosts(contentType, lowercaseTag);

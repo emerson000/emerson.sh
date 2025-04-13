@@ -25,14 +25,16 @@ $ rm ~/.bash_history
 `}
         </CodeBlock>
       </section>
-      <section className="mb-8">
-        <h1 className="text-2xl font-bold mb-4">Recent</h1>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      {recentPosts.length > 0 && (
+        <section className="mb-8">
+          <h1 className="text-2xl font-bold mb-4">Recent</h1>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {recentPosts.map((post) => (
             <BlogCard key={post.slug} post={post} includeSectionBadges={true} />
           ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

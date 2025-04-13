@@ -1,4 +1,4 @@
-import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
+import { getPostBySlug, getContentTypes } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
 import { MDXProvider } from '@/app/components/mdx/MDXProvider';
 import { ContentBreadcrumb } from '@/app/components/ContentBreadcrumb';
@@ -13,6 +13,15 @@ function extractImagesFromMDX(content: string): string[] {
 
 export async function generateMetadata({ params }: { params: Promise<{ contentType: string; slug: string }> }): Promise<Metadata> {
   const { contentType, slug } = await params;
+  
+  // Handle the empty content type and slug case
+  if (contentType === 'empty' && slug === 'empty') {
+    return {
+      title: 'No Content Available | emerson',
+      description: 'No content is available at this time.',
+    };
+  }
+  
   const post = getPostBySlug(slug, contentType);
 
   if (!post) {
@@ -36,20 +45,10 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  const contentTypes = getContentTypes();
-  const params = [];
-
-  for (const type of contentTypes) {
-    const posts = getAllPosts(type.name);
-    for (const post of posts) {
-      params.push({
-        contentType: type.name,
-        slug: post.slug,
-      });
-    }
-  }
-
-  return params;
+  // Always return at least one path to satisfy Next.js static export requirements
+  return [
+    { contentType: 'empty', slug: 'empty' }
+  ];
 }
 
 type PageProps = {
@@ -58,6 +57,17 @@ type PageProps = {
 
 export default async function ContentPage({ params }: PageProps) {
   const { contentType, slug } = await params;
+  
+  // Handle the empty content type and slug case
+  if (contentType === 'empty' && slug === 'empty') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-4">No Content Available</h1>
+        <p className="text-lg mb-4">There is no content available at this time.</p>
+        <p>Please add content to see it displayed here.</p>
+      </div>
+    );
+  }
   
   const contentTypes = getContentTypes();
   const contentTypeExists = contentTypes.some(type => type.name === contentType);

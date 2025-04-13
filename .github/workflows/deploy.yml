@@ -2,6 +2,7 @@ on:
     push:
         branches:
         - main
+        - develop
 jobs:
     deploy:
       runs-on: ubuntu-latest
@@ -30,4 +31,4 @@ jobs:
           with:
             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            command: pages deploy ./out --project-name=emerson-sh
+            command: pages deploy ./out --project-name=emerson-sh --branch=${{ github.ref_name }}

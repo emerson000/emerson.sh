@@ -38,7 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <div className="dark:bg-zinc-950">
+          <div className="bg-white dark:bg-zinc-950">
             {children}
           </div>
           <Footer />

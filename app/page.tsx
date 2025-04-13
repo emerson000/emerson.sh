@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <section className="flex flex-col items-center justify-center mb-8">
-        <p className={cn(logoFont.className, "text-4xl font-bold text-slate-700", "dark:text-slate-200")}>
+        <p className={cn(logoFont.className, "text-3xl md:text-4xl font-bold text-slate-700", "dark:text-slate-200")}>
           <TypewriterText text="Trust, but verify" />
         </p>
       </section>
@@ -19,7 +19,7 @@ export default function Home() {
         <CodeBlock language="bash">
           {`$ whoami
 root
-$ cd /home/emerson
+$ cd /home/[REDACTED]
 $ rm -rf ./*
 $ rm ~/.bash_history
 `}

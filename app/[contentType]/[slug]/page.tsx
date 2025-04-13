@@ -1,9 +1,9 @@
 import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
-import { MDXProvider } from '../../components/mdx/MDXProvider';
-import { ContentBreadcrumb } from '../../components/ContentBreadcrumb';
+import { MDXProvider } from '@/app/components/mdx/MDXProvider';
+import { ContentBreadcrumb } from '@/app/components/ContentBreadcrumb';
 import { Metadata } from 'next';
-
+import { TagBadge } from '@/app/components/TagBadge';
 // Function to extract image URLs from MDX content
 function extractImagesFromMDX(content: string): string[] {
   const imageRegex = /!\[.*?\]\((.*?)\)/g;
@@ -14,7 +14,7 @@ function extractImagesFromMDX(content: string): string[] {
 export async function generateMetadata({ params }: { params: Promise<{ contentType: string; slug: string }> }): Promise<Metadata> {
   const { contentType, slug } = await params;
   const post = getPostBySlug(slug, contentType);
-  
+
   if (!post) {
     return {
       title: 'Not Found',
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
   }
 
   const images = extractImagesFromMDX(post.content);
-  
+
   return {
     title: `${post.title} | ${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`,
     description: post.excerpt || `Read about ${post.title} in our ${contentType} section`,
@@ -58,6 +58,14 @@ type PageProps = {
 
 export default async function ContentPage({ params }: PageProps) {
   const { contentType, slug } = await params;
+  
+  const contentTypes = getContentTypes();
+  const contentTypeExists = contentTypes.some(type => type.name === contentType);
+  
+  if (!contentTypeExists) {
+    notFound();
+  }
+  
   const post = getPostBySlug(slug, contentType);
 
   if (!post) {
@@ -67,17 +75,28 @@ export default async function ContentPage({ params }: PageProps) {
   return (
     <article className="max-w-4xl mx-auto px-4 py-8">
       <ContentBreadcrumb contentType={contentType} post={post} />
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
-        {post.show_dates !== false && (
-          <time className="text-gray-500">
-            {new Date(post.date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </time>
-        )}
+      <header className="mb-8 flex justify-between items-end">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
+          {post.show_dates !== false && (
+            <time className="text-gray-500">
+              {new Date(post.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+          )}
+        </div>
+        <div>
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((tag) => (
+                <TagBadge key={tag} tag={tag} contentType={contentType} />
+              ))}
+            </div>
+          )}
+        </div>
       </header>
       <div className="prose prose-lg max-w-none">
         <MDXProvider source={post.content} />

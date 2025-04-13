@@ -20,6 +20,7 @@ export type Post = {
   excerpt?: string;
   contentType: string;
   show_dates?: boolean;
+  tags?: string[];
 };
 
 export function getContentTypes({ filterNav = false }: { filterNav?: boolean } = {}): ContentType[] {
@@ -61,7 +62,7 @@ export function getContentTypes({ filterNav = false }: { filterNav?: boolean } =
   return contentTypes.sort((a, b) => a.order - b.order);
 }
 
-export function getAllPosts(contentType?: string): Post[] {
+export function getAllPosts(contentType?: string, tag?: string): Post[] {
   const contentTypes = contentType ? [contentType] : getContentTypes().map(type => type.name);
   const allPostsData: Post[] = [];
 
@@ -108,14 +109,23 @@ export function getAllPosts(contentType?: string): Post[] {
           content,
           excerpt: data.excerpt,
           contentType: type,
-          show_dates: showDates
+          show_dates: showDates,
+          tags: data.tags || []
         };
       });
 
     allPostsData.push(...typePosts);
   }
 
-  const sortedPosts = allPostsData.sort((a, b) => moment.utc(b.date).diff(moment.utc(a.date)));
+  let filteredPosts = allPostsData;
+  if (tag) {
+    const lowercaseTag = tag.toLowerCase();
+    filteredPosts = filteredPosts.filter(post => 
+      post.tags?.some(t => t.toLowerCase() === lowercaseTag)
+    );
+  }
+
+  const sortedPosts = filteredPosts.sort((a, b) => moment.utc(b.date).diff(moment.utc(a.date)));
   return sortedPosts;
 }
 

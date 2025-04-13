@@ -1,6 +1,7 @@
 import { getAllPosts, getContentTypes } from '../lib/mdx';
 import { BlogCard } from '../components/BlogCard';
 import { ContentBreadcrumb } from '../components/ContentBreadcrumb';
+import { TagBadge } from '../components/TagBadge';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -41,10 +42,22 @@ export default async function ContentTypePage({ params }: PageProps) {
     notFound();
   }
 
+  // Extract unique tags from all posts
+  const uniqueTags = Array.from(
+    new Set(posts.flatMap(post => post.tags || []))
+  ).sort();
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <ContentBreadcrumb contentType={contentType} />
-      <h1 className="text-4xl font-bold mb-8 capitalize">{contentType}</h1>
+      <h1 className="text-4xl font-bold mb-4 capitalize">{contentType}</h1>
+      {uniqueTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {uniqueTags.map((tag) => (
+            <TagBadge key={tag} tag={tag} contentType={contentType} />
+          ))}
+        </div>
+      )}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         {posts.map((post) => (
           <BlogCard key={post.slug} post={post} />

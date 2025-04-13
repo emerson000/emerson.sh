@@ -9,7 +9,7 @@ export function Header() {
   const contentTypes = getContentTypes();
 
   return (
-    <header className="border-b">
+    <header className="border-b dark:bg-zinc-950">
       <nav className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Logo />

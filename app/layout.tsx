@@ -38,7 +38,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          {children}
+          <div className="dark:bg-zinc-950">
+            {children}
+          </div>
           <Footer />
         </ThemeProvider>
       </body>

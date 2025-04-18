@@ -1,4 +1,4 @@
-import { getAllPosts } from '../lib/mdx';
+import { getAllPosts, getContentTypes } from '../lib/mdx';
 import { BlogCard } from '../components/BlogCard';
 import { ContentBreadcrumb } from '../components/ContentBreadcrumb';
 import { TagBadge } from '../components/TagBadge';
@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  // Always return at least one path to satisfy Next.js static export requirements
-  return [
-    { contentType: 'empty' }
-  ];
+  const contentTypes = getContentTypes();
+  return contentTypes.map(type => ({
+    contentType: type.name
+  }));
 }
 
 type PageProps = {

@@ -1,4 +1,4 @@
-import { getPostBySlug, getContentTypes } from '../../lib/mdx';
+import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
 import { MDXProvider } from '@/app/components/mdx/MDXProvider';
 import { ContentBreadcrumb } from '@/app/components/ContentBreadcrumb';
@@ -45,10 +45,20 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  // Always return at least one path to satisfy Next.js static export requirements
-  return [
-    { contentType: 'empty', slug: 'empty' }
-  ];
+  const contentTypes = getContentTypes();
+  const params = [];
+  
+  for (const type of contentTypes) {
+    const posts = getAllPosts(type.name);
+    for (const post of posts) {
+      params.push({
+        contentType: type.name,
+        slug: post.slug
+      });
+    }
+  }
+  
+  return params;
 }
 
 type PageProps = {

@@ -1,4 +1,4 @@
-import { getAllPosts } from '../../../lib/mdx';
+import { getAllPosts, getContentTypes } from '../../../lib/mdx';
 import { BlogCard } from '../../../components/BlogCard';
 import { ContentBreadcrumb } from '../../../components/ContentBreadcrumb';
 import { notFound } from 'next/navigation';
@@ -33,10 +33,26 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  // Always return at least one path to satisfy Next.js static export requirements
-  return [
-    { contentType: 'empty', tag: 'empty' }
-  ];
+  const contentTypes = getContentTypes();
+  const params = [];
+  
+  for (const type of contentTypes) {
+    const posts = getAllPosts(type.name);
+    // Get unique tags from all posts in this content type
+    const uniqueTags = Array.from(
+      new Set(posts.flatMap(post => post.tags || []))
+    );
+    
+    // Add a param for each unique tag
+    for (const tag of uniqueTags) {
+      params.push({
+        contentType: type.name,
+        tag: tag.toLowerCase() // Ensure consistent casing
+      });
+    }
+  }
+  
+  return params;
 }
 
 type PageProps = {

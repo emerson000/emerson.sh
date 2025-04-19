@@ -1,0 +1,116 @@
+---
+title: "iOS Hardening Guide"
+excerpt: "A reference for basic privacy and security settings on iOS."
+date: "2025-04-19"
+tags: ["Security", "Privacy"]
+---
+
+This basic checklist is designed to strengthen the security and privacy of iOS devices.
+These settings are opinionated and intended for low risk users.
+
+High-risk users should review the additional resources at the end of this guide.
+Other considerations may include:
+- Lockdown mode
+- Puchasing the device anonymously
+- Avoiding Apple ID and other cloud services
+
+## Settings
+
+Open the `Settings` app and review the settings in each section below.
+
+### General
+
+#### Software Update
+<Checklist id="general-software-update">
+- Automatic Updates: `Enable`
+	- iOS Updates: `Enable`
+	- Security Responses & System Files: `Enable`
+	- iOS Updates: `Enable`
+</Checklist>
+
+#### AirDrop
+<Checklist id="general-airdrop">
+- Receiving Off: `Select`
+- Bringing Devices Together: `Disable`
+- Use Cellular Data: `Disable`
+</Checklist>
+
+#### AirPlay & Continency
+<Checklist id="general-airplay-continuity">
+- Automatically AirPlay: `Never`
+- Transfer to HomePod: `Disable`
+- Handoff: `Disable`
+- Continuity Camera: `Disable`
+- AirPlay Receiver: `Disable`
+</Checklist>
+
+### Search
+<Checklist id="general-search">
+- Show Recent Searches: `Disable`
+- Show Related Content: `Disable`
+- Search Engine: `DuckDuckGo`
+- Help Apple Improve Search: `Disable`
+</Checklist>
+
+### Siri
+<Checklist id="general-siri">
+- Talk to Siri: `Off`
+- Press Side Button for Siri: `Off`
+- Siri & Dictation History: `Delete Siri & Dictation History`
+- Reset Hidden Suggestions: `Press`
+- Allow Notifications: `Disable`
+- Show in App Library: `Disable`
+- Show When Sharing: `Disable`
+- Show Listening Suggestions: `Disable`
+</Checklist>
+
+### Face ID & Passcode
+<Checklist id="general-face-id-passcode">
+- Face ID: `Enable`
+- Require Attention for Face ID: `Enable`
+- Attention Aware Features: `Enable`
+- Stolen Device Protection: `Enable`
+	- Require Security Delay: `Away from Familiar Locations`
+- Passcode Length: `At least 6 digits`
+	- Consider alphanumeric passcode
+- Require Passcode: `Immediately`
+- Erase Data after 10 failed attempts: `Enable`
+</Checklist>
+
+### Privacy & Security
+
+#### Location Services
+<Checklist id="privacy-location-services">
+- For each app, set the location access to `Never` except for essential apps.
+- System Services:
+	- iPhone Analytics: `Disable`
+	- Improve Maps: `Disable`
+	- Status Bar Icon: `Enable`
+</Checklist>
+
+#### Tracking
+<Checklist id="privacy-tracking">
+- Allow Apps to Request to Track: `Disable`
+- Ensure all apps on this page are disabled
+</Checklist>
+
+#### Analytics & Improvements
+<Checklist id="privacy-analytics-improvements">
+- Share iPhone & Watch Analytics: `Disable`
+- Share iCloud Analytics: `Disable`
+- Improve Siri & Dictation: `Disable`
+- Improve Assistive Voice Features: `Disable`
+- Improve AR Location Accuracy: `Disable`
+</Checklist>
+
+#### Apple Advertising
+<Checklist id="privacy-apple-advertising">
+- Personalized Ads: `Disable`
+</Checklist>
+
+#### Other Privacy Settings
+Review the remaining privacy settings and disable app access for anything you are not comfortable with. Always grant the least privileges required to fulfil the need.
+
+## Additional Resources
+- [https://github.com/iAnonymous3000/iOS-Hardening-Guide](https://github.com/iAnonymous3000/iOS-Hardening-Guide)
+- [How to: Get to Know iPhone Privacy and Security Settings | Electronic Frontier Foundation](https://ssd.eff.org/module/how-to-get-to-know-iphone-privacy-and-security-settings)

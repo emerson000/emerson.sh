@@ -118,7 +118,7 @@ export default async function ContentPage({ params }: PageProps) {
           )}
         </div>
       </header>
-      <div className="prose prose-lg max-w-none">
+      <div className="prose prose-lg max-w-none bg-muted dark:bg-zinc-900 p-6 rounded-2xl shadow-md border text-foreground">
         <MDXProvider source={post.content} />
       </div>
     </article>

@@ -9,7 +9,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import moment from 'moment';
+import { formatDate } from '@/lib/utils';
 
 interface BlogCardProps {
   post: Post;
@@ -17,7 +17,7 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ post, includeSectionBadges = false }: BlogCardProps) {
-  const formattedDate = moment.utc(post.date).format('MMMM D, YYYY');
+  const formattedDate = formatDate(post.date);
 
   return (
     <Link href={`/${post.contentType}/${post.slug}`}>

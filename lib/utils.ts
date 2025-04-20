@@ -1,17 +1,12 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-
+import moment from 'moment';
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
 export function formatDate(input: string | number): string {
-    const date = new Date(input)
-    return date.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    })
+    return moment.utc(input).format('MMMM D, YYYY');
 }
 
 export function absoluteUrl(path: string) {

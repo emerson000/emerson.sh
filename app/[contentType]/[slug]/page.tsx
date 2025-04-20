@@ -4,7 +4,8 @@ import { MDXProvider } from '@/app/components/mdx/MDXProvider';
 import { ContentBreadcrumb } from '@/app/components/ContentBreadcrumb';
 import { Metadata } from 'next';
 import { TagBadge } from '@/app/components/TagBadge';
-// Function to extract image URLs from MDX content
+import { formatDate } from '@/lib/utils';
+
 function extractImagesFromMDX(content: string): string[] {
   const imageRegex = /!\[.*?\]\((.*?)\)/g;
   const matches = [...content.matchAll(imageRegex)];
@@ -14,7 +15,6 @@ function extractImagesFromMDX(content: string): string[] {
 export async function generateMetadata({ params }: { params: Promise<{ contentType: string; slug: string }> }): Promise<Metadata> {
   const { contentType, slug } = await params;
   
-  // Handle the empty content type and slug case
   if (contentType === 'empty' && slug === 'empty') {
     return {
       title: 'No Content Available | emerson',
@@ -68,7 +68,6 @@ type PageProps = {
 export default async function ContentPage({ params }: PageProps) {
   const { contentType, slug } = await params;
   
-  // Handle the empty content type and slug case
   if (contentType === 'empty' && slug === 'empty') {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -100,11 +99,7 @@ export default async function ContentPage({ params }: PageProps) {
           <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
           {post.show_dates !== false && (
             <time className="text-gray-500">
-              {new Date(post.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formatDate(post.date)}
             </time>
           )}
         </div>

@@ -24,6 +24,7 @@ export function MobileMenu({ contentTypes }: MobileMenuProps) {
             <SheetClose asChild>
               <Link 
                 href="/" 
+                title="Home"
                 className="text-sm font-medium p-2 hover:bg-accent rounded-md hover:text-primary transition-colors capitalize flex items-center gap-2"
               >
                 <House className="w-5 h-5" />
@@ -34,6 +35,7 @@ export function MobileMenu({ contentTypes }: MobileMenuProps) {
               <SheetClose key={type.name} asChild>
                 <Link
                   href={`/${type.name}`}
+                  title={`View ${type.name}`}
                   className="text-sm font-medium p-2 hover:bg-accent rounded-md hover:text-primary transition-colors capitalize"
                 >
                   {type.name}

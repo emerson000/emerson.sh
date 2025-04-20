@@ -16,7 +16,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "emerson",
+  title: "Emerson | Technical Notes and Ideas",
+  description: "A collection of technical notes, ideas, and reflections from Emerson. Topics include security, technology, and personal development. Trust, but verify.",
+  openGraph: {
+    title: "Emerson | Technical Notes and Ideas",
+    description: "A collection of technical notes, ideas, and reflections from Emerson. Topics include security, technology, and personal development. Trust, but verify.",
+    type: 'website',
+    images: [
+      {
+        url: '/apple-icon.png',
+        width: 180,
+        height: 180,
+        alt: 'Emerson - Technical Notes and Ideas'
+      }
+    ],
+  },
   icons: {
     icon: '/icon.png',
     apple: '/apple-icon.png',

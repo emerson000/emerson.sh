@@ -20,14 +20,18 @@ export function ContentBreadcrumb({ contentType, post }: ContentBreadcrumbProps)
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/">Home</Link>
+            <Link href="/" title="Return to Homepage">Home</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           {post ? (
             <BreadcrumbLink asChild>
-              <Link href={`/${contentType}`} className="capitalize">
+              <Link 
+                href={`/${contentType}`} 
+                className="capitalize"
+                title={`Browse all ${contentType} articles`}
+              >
                 {contentType}
               </Link>
             </BreadcrumbLink>

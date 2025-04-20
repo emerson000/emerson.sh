@@ -20,7 +20,10 @@ export function BlogCard({ post, includeSectionBadges = false }: BlogCardProps) 
   const formattedDate = formatDate(post.date);
 
   return (
-    <Link href={`/${post.contentType}/${post.slug}`}>
+    <Link 
+      href={`/${post.contentType}/${post.slug}`}
+      title={`Read ${post.title} - ${post.contentType.charAt(0).toUpperCase() + post.contentType.slice(1)}`}
+    >
       <Card className="h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1">
         <CardHeader>
           <CardTitle className="text-2xl">{post.title}</CardTitle>

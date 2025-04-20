@@ -15,13 +15,16 @@ export function Header() {
           <Logo />
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium p-2 hover:bg-accent rounded-md hover:text-primary transition-colors capitalize">
+            <Link href="/"
+            title="Home"
+            className="text-sm font-medium p-2 hover:bg-accent rounded-md hover:text-primary transition-colors capitalize">
               <House className="w-5 h-5" />
             </Link>
             {contentTypes.map((type) => (
               <Link
                 key={type.name}
                 href={`/${type.name}`}
+                title={`View ${type.name}`}
                 className="text-sm font-medium hover:text-primary transition-colors capitalize"
               >
                 {type.name}

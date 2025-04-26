@@ -5,6 +5,8 @@ import { CodeBlock } from './CodeBlock';
 import { CustomImage } from './CustomImage';
 import { Anchor } from './Anchor';
 import { Checklist } from './Checklist';
+import { CryptonymGenerator } from './CryptonymGenerator';
+
 const htmlComponent = (tag: string, className: string) => {
   const Component = ({ children }: { children: React.ReactNode }) => 
     React.createElement(tag, { className }, children);
@@ -25,11 +27,12 @@ const components = {
   ul: htmlComponent('ul', 'list-inside mt-0 mb-0'),
   ol: htmlComponent('ol', 'list-decimal list-inside'),
   li: htmlComponent('li', ''),
-  blockquote: htmlComponent('blockquote', 'border-l-2 border-gray-300 pl-4 py-2 italic'),
+  blockquote: htmlComponent('blockquote', 'border-l-2 border-gray-300 pl-4 py-2 italic text-muted-foreground'),
   a: Anchor,
   img: CustomImage,
   code: htmlComponent('code', 'bg-gray-100 p-1 rounded dark:bg-gray-800 not-prose font-bold'),
   Checklist,
+  CryptonymGenerator,
 };
 
 type MDXProviderProps = {

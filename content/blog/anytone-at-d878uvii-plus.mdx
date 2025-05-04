@@ -1,0 +1,92 @@
+---
+title: "AnyTone AT-D878UVII Plus"
+excerpt: "Various programming notes for the AnyTone AT-D878UVII Plus radio."
+date: "2025-05-04"
+tags: ["Two-Way Radio"]
+---
+
+This handheld radio from Anytone is a powerful DMR radio. This article contains various reference materials and notes on programming the radio.
+
+<TableOfContents />
+
+## Install the CPS
+The CPS is the primary application used to program the radio. It contains tools for general programming, firmware upgrades, and many other tools.
+1. Download the latest zip file for `D878UVII PLUS` from [Anytone](https://www.anytone.net/download).
+2. Extract the zip and open the CPS folder.
+3. Run the setup installer `D878UVII_Setup_3.06.exe`.
+4. Run the program `D878UVII_3.06`.
+Retain the downloaded CPS files as there are many files and manuals that you may need later on.
+
+## Identify the radio band plan
+AnyTone ships radios locked to a certain band plan that determines which frequencies it can transmit on. The best way to determine what band plan your radio is using is to use the CPS to read information from your radio.
+1. Open the CPS program (D878UVII_3.06).
+2. Connect the radio to USB.
+3. Turn the radio on.
+4. Set the COM port under `Set > Set COM`.
+5. Click `Program > Read From Radio`.
+6. Once `Read From Radio` is complete, navigate to `Model > Model Information`.
+The frequency field lists the current band mode. Codeplug files must match the band plan of the radio. Changing the band plan in the CPS will not change the band plan of the radio.
+
+
+<Alert type="warning" title="Error and crash during read">
+The CPS may crash with the error <b>GetOptionFromCommData_Error</b> when attempting to read from radio. This error can occur when using a more up-to-date CPS with a radio running older firmware. If this occurs, then see the section on upgrading the radio firmware.
+</Alert>
+
+## Change the radio band plan
+Changing the band plan may be required if you intend to transmit on certain frequencies. The steps below may be used to change a radio's band plan. Changing the radio's band plan will require you to create a new codeplug in the target band plan.
+
+Take care to use a band plan and codeplug that is consistent with applicable laws and regulations.
+1. Download `AT Options_vX.zip` from [PNWDigital](https://pnwdigital.net/files/#anytonecpsmenu).
+2. Extract the zip and run the exe.
+3. Power on the radio.
+4. Accept the disclaimer warning.
+5. Select a COM port.
+6. Click `Read`.
+7. Select a `Frequency` mode.
+8. Click `Write`.
+
+## Upgrade the radio firmware
+Read the instructions in the CPS folder that was downloaded earlier. The instructions are in `A READ FIRST - Update Instructions/Firmware Update Instructions.pdf`.
+1. Press and hold the PTT key and the PF3 key (top alarm key) at the same time while powering the radio on. Release once the red LED starts blinking. The screen remains dark during this process.
+2. In the CPS, navigate to `Tools > Firmware and Icon Update`.
+3. Click `Open Update File`.
+4. Choose the `spi` file in the `FW` folder in the CPS files. An example folder is `D878UVII_V3.06 FW`.
+5. Verify the COM port and click `Write`.
+6. Reset the radio to factory defaults:
+	1. Power off the radio.
+	2. Press and hold the PTT key and the PF1 key (side up button with single dash) while powering the radio on.
+	3. Press `Confirm` when prompted.
+	4. Follow prompts to set the date.
+
+## Motorola Talk Permit Tone
+The talk permit and alert tones can be customized to sound like Motorola digital radios. The charts below list the settings for various tones. These are configured in the CPS under `Common Setting > Optional Setting > Alert Tone`.
+
+### Call Permit Tone
+
+| Tone        | Frequency | Period |
+| ----------- | --------- | ------ |
+| First Tone  | 910       | 70     |
+| Second Tone | 0         | 20     |
+| Third Tone  | 910       | 30     |
+| Fourth Tone | 0         | 20     |
+| Fifth Tone  | 910       | 60     |
+
+### Idle Channel Tone
+
+| Tone        | Frequency | Period |
+| ----------- | --------- | ------ |
+| First Tone  | 0         | 40     |
+| Second Tone | 1570      | 40     |
+| Third Tone  | 1050      | 40     |
+| Fourth Tone | 1570      | 40     |
+| Fifth Tone  | 1317      | 40     |
+
+### Call Reset Tone
+
+| Tone        | Frequency | Period |
+| ----------- | --------- | ------ |
+| First Tone  | 0         | 40     |
+| Second Tone | 1570      | 40     |
+| Third Tone  | 1050      | 40     |
+| Fourth Tone | 1570      | 40     |
+| Fifth Tone  | 1317      | 40     |

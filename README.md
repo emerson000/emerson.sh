@@ -55,6 +55,7 @@ Content is organized into directories under `content/` with each directory repre
 ---
 order: 1             # Controls display order in navigation (lower = higher priority)
 nav: true            # Whether to show in navigation
+slug: blog           # URL slug of the content type
 show_in_recent: true # Whether to include in recent content listings
 show_dates: true     # Whether to display dates for this content type
 ---

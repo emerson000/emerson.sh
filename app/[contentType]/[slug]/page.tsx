@@ -1,10 +1,13 @@
-import { getPostBySlug, getContentTypes, getAllPosts } from '../../lib/mdx';
+import { getPostBySlug, getContentTypes } from '../../lib/mdx';
 import { notFound } from 'next/navigation';
 import { MDXProvider } from '@/app/components/mdx/MDXProvider';
 import { ContentBreadcrumb } from '@/app/components/ContentBreadcrumb';
 import { Metadata } from 'next';
 import { TagBadge } from '@/app/components/TagBadge';
 import { formatDate } from '@/lib/utils';
+import path from 'path';
+import fs from 'fs';
+import matter from 'gray-matter';
 
 function extractImagesFromMDX(content: string): string[] {
   const imageRegex = /!\[.*?\]\((.*?)\)/g;
@@ -49,12 +52,23 @@ export async function generateStaticParams() {
   const params = [];
   
   for (const type of contentTypes) {
-    const posts = getAllPosts(type.name);
-    for (const post of posts) {
-      params.push({
-        contentType: type.name,
-        slug: post.slug
-      });
+    const typeDirectory = path.join(process.cwd(), 'content', type.name);
+    if (fs.existsSync(typeDirectory)) {
+      const fileNames = fs.readdirSync(typeDirectory);
+      
+      for (const fileName of fileNames) {
+        if (fileName.endsWith('.mdx') && fileName !== '_index.mdx') {
+          const fullPath = path.join(typeDirectory, fileName);
+          const fileContents = fs.readFileSync(fullPath, 'utf8');
+          const { data } = matter(fileContents);
+          const slug = data.slug || fileName.replace(/\.mdx$/, '');
+          
+          params.push({
+            contentType: type.name,
+            slug
+          });
+        }
+      }
     }
   }
   

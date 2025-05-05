@@ -1,4 +1,4 @@
-import { getAllPosts, getContentTypes } from '../lib/mdx';
+import { getContentTypes, getAllPostsForContentType } from '../lib/mdx';
 import { BlogCard } from '../components/BlogCard';
 import { ContentBreadcrumb } from '../components/ContentBreadcrumb';
 import { TagBadge } from '../components/TagBadge';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
     };
   }
   
-  const posts = getAllPosts(contentType);
+  const posts = getAllPostsForContentType(contentType);
   
   if (!posts.length) {
     return {
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ contentTy
 }
 
 export async function generateStaticParams() {
-  const contentTypes = getContentTypes();
+  const contentTypes = getContentTypes({ filterNav: false });
   return contentTypes.map(type => ({
     contentType: type.name
   }));
@@ -57,13 +57,15 @@ export default async function ContentTypePage({ params }: PageProps) {
     );
   }
   
-  const posts = getAllPosts(contentType);
-
-  if (!posts.length) {
+  const contentTypes = getContentTypes();
+  const contentTypeExists = contentTypes.some(type => type.name === contentType);
+  
+  if (!contentTypeExists) {
     notFound();
   }
+  
+  const posts = getAllPostsForContentType(contentType);
 
-  // Extract unique tags from all posts
   const uniqueTags = Array.from(
     new Set(posts.flatMap(post => post.tags || []))
   ).sort();
@@ -79,11 +81,17 @@ export default async function ContentTypePage({ params }: PageProps) {
           ))}
         </div>
       )}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        {posts.map((post) => (
-          <BlogCard key={post.slug} post={post} />
-        ))}
-      </div>
+      {posts.length > 0 ? (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+          {posts.map((post) => (
+            <BlogCard key={post.slug} post={post} />
+          ))}
+        </div>
+      ) : (
+        <div>
+          <p className="text-lg mb-4">No posts are available in this section.</p>
+        </div>
+      )}
     </div>
   );
 } 

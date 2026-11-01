@@ -1,0 +1,181 @@
+---
+// Mock of a case graph, for the "graphic" slot of <Scrolly>. Nodes and edges
+// appear as the Scrolly root's state tokens accumulate:
+//   case     the linked article and post, and the organization they mention
+//   subject  the lookalike domain, added as the case subject
+//   dns      its address, name server and mail host
+//   whois    its WHOIS contact, the network (ASN), the certificate, the second
+//            domain the certificate names, and the refund page on that domain
+//   focus    the certificate is selected; nodes it does not touch fade back
+//   found    the certificate carries a "Finding" marker
+// Readers can select any visible node; the inspector lists its connections.
+// Without JavaScript the final state shows with the certificate selected.
+// All names are invented, on .example domains and documentation addresses.
+
+interface Props { id?: string }
+const { id = "kg" } = Astro.props;
+
+type N = { id: string; kind: string; glyph: string; name: string; short: string; x: number; y: number; at: string };
+const nodes: N[] = [
+  { id: "art", kind: "Article", glyph: "A", name: "Campers report fake recall refund emails", short: "Article", x: 10, y: 16, at: "case" },
+  { id: "post", kind: "Post", glyph: "S", name: "Got a “Pellwood recall refund” email", short: "Post", x: 10, y: 74, at: "case" },
+  { id: "org", kind: "Organization", glyph: "O", name: "Pellwood Outdoor", short: "Pellwood Outdoor", x: 36, y: 10, at: "case" },
+  { id: "dom1", kind: "Domain", glyph: "D", name: "pellwood-recall.example", short: "pellwood-recall", x: 32, y: 46, at: "subject" },
+  { id: "ip", kind: "IP address", glyph: "IP", name: "203.0.113.24", short: "203.0.113.24", x: 62, y: 20, at: "dns" },
+  { id: "ns", kind: "Domain", glyph: "D", name: "ns1.parkhost.example", short: "ns1.parkhost", x: 60, y: 48, at: "dns" },
+  { id: "mx", kind: "Domain", glyph: "D", name: "mx.pellwood-recall.example", short: "mx host", x: 46, y: 84, at: "dns" },
+  { id: "asn", kind: "ASN", glyph: "AS", name: "AS64500", short: "AS64500", x: 89, y: 12, at: "whois" },
+  { id: "mail", kind: "Email", glyph: "@", name: "reg@mailbox.example", short: "reg@mailbox", x: 20, y: 94, at: "whois" },
+  { id: "cert", kind: "Certificate", glyph: "SSL", name: "TLS certificate, 2 names", short: "Certificate", x: 76, y: 70, at: "whois" },
+  { id: "dom2", kind: "Domain", glyph: "D", name: "pellwood-refunds.example", short: "pellwood-refunds", x: 86, y: 40, at: "whois" },
+  { id: "page", kind: "Web page", glyph: "W", name: "Claim your Pellwood refund", short: "Refund page", x: 91, y: 92, at: "whois" },
+];
+// [from, to, relationship] — relationship names as Kayori labels them.
+const edges: [string, string, string][] = [
+  ["art", "org", "Mentions"],
+  ["art", "dom1", "Mentions"],
+  ["post", "dom1", "Mentions"],
+  ["dom1", "ip", "Resolves To"],
+  ["ns", "dom1", "NS Record For"],
+  ["mx", "dom1", "MX Record For"],
+  ["ip", "asn", "Announced By"],
+  ["mail", "dom1", "WHOIS Contact For"],
+  ["cert", "dom1", "Certificate Issued For"],
+  ["cert", "dom2", "Certificate Issued For"],
+  ["page", "dom2", "Hosted On"],
+];
+const ORDER = ["case", "subject", "dns", "whois"];
+const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+const later = (a: string, b: string) => (ORDER.indexOf(a) > ORDER.indexOf(b) ? a : b);
+const near = new Set(["cert", "dom1", "dom2"]);
+const conns = (nid: string) =>
+  edges
+    .filter(([a, b]) => a === nid || b === nid)
+    .map(([a, b, rel]) => {
+      const other = byId[a === nid ? b : a];
+      return { rel, out: a === nid, other, at: later(byId[a].at, byId[b].at) };
+    });
+---
+<div class="kg" data-case-graph>
+  <p class="km-label kg-title" id={`${id}-t`}>Case graph</p>
+  <div class="kg-canvas" role="group" aria-labelledby={`${id}-t`}>
+    <svg class="kg-edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      {edges.map(([a, b]) => (
+        <line x1={byId[a].x} y1={byId[a].y} x2={byId[b].x} y2={byId[b].y}
+          data-at={later(byId[a].at, byId[b].at)} data-near={a === "cert" || b === "cert" ? "" : undefined} />
+      ))}
+    </svg>
+    {nodes.map((n) => (
+      <button type="button" class="kg-node" data-node={n.id} data-at={n.at} data-near={near.has(n.id) ? "" : undefined}
+        aria-pressed={n.id === "cert" ? "true" : "false"} style={`--x:${n.x};--y:${n.y}`}>
+        <span class="kg-dot" aria-hidden="true">{n.glyph}</span>
+        <span class="kg-name"><span class="sr-only">{n.kind}: </span><span class="kg-short">{n.short}</span><span class="sr-only">{n.short !== n.name ? ` (${n.name})` : ""}</span></span>
+        {n.id === "cert" && <span class="kg-found">Finding</span>}
+      </button>
+    ))}
+  </div>
+  <div class="kg-insp" aria-live="polite">
+    {nodes.map((n) => (
+      <div class="kg-panel" data-panel={n.id} hidden={n.id !== "cert"}>
+        <p class="kg-ptitle"><span class="km-chip">{n.kind}</span> <strong>{n.name}</strong></p>
+        <ul class="kg-conns">
+          {conns(n.id).map((c) => (
+            <li data-at={c.at}><span class="km-mono">{c.out ? "→" : "←"} {c.rel}</span> {c.other.name}</li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  // Selection. On each scroll step the inspector returns to that step's subject;
+  // the reader can then select any visible node.
+  const DEFAULT: Record<string, string> = { case: "art", subject: "dom1", dns: "dom1", whois: "cert", focus: "cert", found: "cert" };
+
+  document.querySelectorAll<HTMLElement>("[data-case-graph]").forEach((g) => {
+    const nodes = [...g.querySelectorAll<HTMLButtonElement>(".kg-node")];
+    const panels = [...g.querySelectorAll<HTMLElement>(".kg-panel")];
+    function select(id: string) {
+      nodes.forEach((n) => n.setAttribute("aria-pressed", String(n.dataset.node === id)));
+      panels.forEach((p) => (p.hidden = p.dataset.panel !== id));
+      g.dataset.picked = id;
+    }
+    nodes.forEach((n) =>
+      n.addEventListener("click", () => {
+        g.dataset.user = "1";
+        select(n.dataset.node!);
+      }),
+    );
+    const root = g.closest<HTMLElement>("[data-scrolly]");
+    root?.addEventListener("scrolly:step", (e) => {
+      const tokens = ((e as CustomEvent).detail.state as string).split(/\s+/).filter(Boolean);
+      delete g.dataset.user;
+      select(DEFAULT[tokens[tokens.length - 1]] ?? "art");
+    });
+  });
+</script>
+
+<style>
+  .kg { font: 14px/1.4 var(--body); color: var(--text); border: 1px solid var(--line-strong); background: var(--bg); }
+  .kg-title { padding: var(--s2) var(--s3); margin: 0; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .kg-canvas { position: relative; aspect-ratio: 16 / 11; margin: var(--s5) var(--s7) var(--s7); }
+  .kg-edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .kg-edges line { stroke: var(--muted); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+
+  .kg-node {
+    position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 0; margin: 0; border: 0; background: none; color: var(--text); font: inherit; cursor: pointer; z-index: 1;
+  }
+  .kg-dot {
+    display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--muted); background: var(--bg); font: 600 11px/1 var(--mono); letter-spacing: 0;
+  }
+  .kg-name { font-size: 12px; line-height: 1.2; white-space: nowrap; background: var(--bg); padding: 0 2px; color: var(--muted); }
+  .kg-node:hover .kg-dot { border-color: var(--text); }
+  .kg-node:hover .kg-name { color: var(--text); }
+  .kg-node[aria-pressed="true"] .kg-dot { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-hover); box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent); }
+  .kg-node[aria-pressed="true"] .kg-name { color: var(--text); font-weight: 600; }
+  .kg-node:focus-visible { outline: none; }
+  .kg-node:focus-visible .kg-dot { outline: 2px solid var(--focus); outline-offset: 6px; }
+  .kg-found { display: none; font: 500 12px/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: var(--bg); border: 1px solid var(--accent); padding: 0 4px; }
+
+  /* Appear with the state tokens. Hidden nodes are not focusable. */
+  [data-at] { visibility: hidden; opacity: 0; }
+  :global([data-scrolly][data-state~="case"]) [data-at="case"],
+  :global([data-scrolly][data-state~="subject"]) [data-at="subject"],
+  :global([data-scrolly][data-state~="dns"]) [data-at="dns"],
+  :global([data-scrolly][data-state~="whois"]) [data-at="whois"] { visibility: visible; opacity: 1; }
+
+  /* Focus on the certificate: everything it does not touch steps back.
+     Text keeps the muted colour, so it still meets contrast. */
+  :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-node:not([data-near]) .kg-dot { border-style: dashed; color: var(--muted); }
+  :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-edges line:not([data-near]) { stroke-dasharray: 3 3; }
+  :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-edges line[data-near] { stroke: var(--accent); stroke-width: 2.5; }
+  :global([data-scrolly][data-state~="found"]) .kg-found { display: block; }
+
+  .kg-insp { border-top: 1px solid var(--line); padding: var(--s3) var(--s4); min-height: 9.5rem; }
+  .kg-ptitle { margin: 0 0 var(--s2); overflow-wrap: anywhere; }
+  .kg-conns { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+  .kg-conns li { margin: 0 0 2px; overflow-wrap: anywhere; }
+  .kg-conns .km-mono { color: var(--muted); font-size: 12px; margin-right: var(--s1); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-at] { transition: opacity var(--base) var(--ease), visibility var(--base); }
+    .kg-dot { transition: border-color var(--fast) var(--ease), background-color var(--fast) var(--ease); }
+  }
+
+  /* Narrow screens: the graphic is pinned in less than half the screen, so
+     names move to the inspector, which shows one line. */
+  @media (max-width: 860px) {
+    .kg-title { display: none; }
+    .kg { border: 0; }
+    .kg-canvas { margin: var(--s4) var(--s5) var(--s4); aspect-ratio: 16 / 10; max-height: 30vh; margin-inline: auto; width: min(100% - 2 * var(--s5), 48vh); }
+    .kg-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    .kg-found { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; }
+    .kg-dot { width: 28px; height: 28px; font-size: 11px; }
+    .kg-insp { min-height: 0; padding: var(--s2) 0 0; border-top: 0; }
+    .kg-conns { display: none; }
+  }
+</style>

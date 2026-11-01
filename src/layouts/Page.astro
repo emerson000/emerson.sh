@@ -1,0 +1,19 @@
+---
+// About and Now: a Markdown page from src/content/pages/.
+import Base from "./Base.astro";
+import { fmtDate, isoDate } from "../lib/site";
+interface Props { title: string; description?: string; lede?: string; updated?: Date; jsonLd?: Record<string, unknown>[] }
+const { title, description, lede, updated, jsonLd } = Astro.props;
+---
+<Base title={title} description={description ?? lede} jsonLd={jsonLd}>
+  <div class="wrap">
+    <div class="page-head">
+      <h1>{title}</h1>
+      {lede && <p class="lede">{lede}</p>}
+      {!lede && updated && <p class="meta" style="margin-top: var(--s3)">Updated <time datetime={isoDate(updated)}>{fmtDate(updated)}</time></p>}
+    </div>
+    <div class="prose">
+      <slot />
+    </div>
+  </div>
+</Base>

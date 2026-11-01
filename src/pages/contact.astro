@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+import Email from "../components/Email.astro";
+import { SITE } from "../lib/site";
+---
+<Base title="Contact" description="How to reach Emerson Stewart: email, PGP and security reports.">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Contact</h1>
+      <p class="lede">Email is best. I read everything and reply to most within a few days.</p>
+    </div>
+    <div class="prose">
+      <dl class="dl">
+        <dt>Email</dt><dd><Email address={SITE.email} /></dd>
+        <dt id="pgp">PGP</dt><dd>A public key is on its way. Until then, ask by email and I'll send it over Signal or in person.</dd>
+        <dt>Security</dt><dd>Found a vulnerability in something I run? See <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</dd>
+      </dl>
+    </div>
+  </div>
+</Base>

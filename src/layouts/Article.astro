@@ -1,0 +1,47 @@
+---
+import type { MarkdownHeading } from "astro";
+import Base from "./Base.astro";
+import Toc from "../components/Toc.astro";
+import PrevNext from "../components/PrevNext.astro";
+import { PILLARS, fmtDate, isoDate, isDraft, readingMinutes, slugOf, type Post } from "../lib/site";
+import { articleJsonLd } from "../lib/article";
+
+interface Props { post: Post; headings: MarkdownHeading[]; older?: Post; newer?: Post }
+const { post, headings, older, newer } = Astro.props;
+const draft = isDraft(post);
+const { title, description, date, updated, pillar, toc } = post.data;
+const minutes = readingMinutes(post.body);
+---
+<Base title={title} description={description} image={`/og/${slugOf(post)}.png`} type="article" jsonLd={[articleJsonLd(post)]} published={date} modified={updated} noindex={draft}>
+  <article class="wrap">
+    <header class="art-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="/writing/">Writing</a> / <a href={`/writing/?topic=${pillar}`}>{PILLARS[pillar]}</a></nav>
+      <h1>{title}{draft && <> <span class="draft-badge">Draft</span></>}</h1>
+      <p class="lede">{description}</p>
+      <p class="meta">
+        {updated ? (
+          <>
+            <span>Updated <time datetime={isoDate(updated)}>{fmtDate(updated)}</time></span>
+            <span>First published <time datetime={isoDate(date)}>{fmtDate(date)}</time></span>
+          </>
+        ) : (
+          <span><time datetime={isoDate(date)}>{fmtDate(date)}</time></span>
+        )}
+        <span>{minutes} min</span>
+      </p>
+    </header>
+    <div class="art-grid">
+      <div class="prose" id="article-body">
+        {toc && <Toc headings={headings} variant="details" />}
+        <slot />
+        <PrevNext older={older} newer={newer} />
+      </div>
+      {toc && <Toc headings={headings} variant="aside" />}
+    </div>
+  </article>
+</Base>
+
+<script>
+  import "../scripts/checklists";
+  import "../scripts/toc";
+</script>

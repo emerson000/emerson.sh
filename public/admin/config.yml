@@ -1,0 +1,134 @@
+# Sveltia CMS for emerson.sh. Sign in with a fine-grained GitHub token scoped to
+# this repository (Contents: read and write). Every save is a commit to main of a
+# PUBLIC repo, which the GitHub Actions workflow builds and deploys. Drafts are
+# never edited here: they live locally as <slug>.draft.md. See README.md.
+backend:
+  name: github
+  repo: emerson000/emerson.sh
+  branch: main
+  # base_url: https://auth.emerson.sh   # only with the Sveltia CMS Authenticator worker
+
+site_url: https://emerson.sh
+display_url: https://emerson.sh
+logo:
+  src: /favicon.svg
+media_folder: public/media
+public_folder: /media
+
+output:
+  omit_empty_optional_fields: true
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  # Normal articles only. Feature articles are .mdx files with interactive
+  # components; they are edited in code, so `extension: md` keeps them out.
+  - name: writing
+    label: Writing
+    label_singular: Article
+    description: "Published articles. Every save is a public commit to GitHub and goes live within minutes, so write and review drafts locally as <slug>.draft.md (never committed) and paste them here when approved. Callouts: start a quote with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CAUTION]. Checklists: use task list items (- [ ] Setting: value), with the reason on the next line."
+    folder: src/content/writing
+    extension: md
+    format: frontmatter
+    create: true
+    delete: false
+    slug: "{{slug}}"
+    identifier_field: title
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    sortable_fields:
+      fields: [date, title, pillar]
+      default:
+        field: date
+        direction: descending
+    view_groups:
+      - label: Topic
+        field: pillar
+    fields:
+      - { name: title, label: Title, widget: string }
+      - name: description
+        label: Description
+        widget: text
+        hint: One sentence, at most 160 characters. Used as the deck under the title and as the search description.
+        pattern: ["^[\\s\\S]{1,160}$", "At most 160 characters"]
+      # Date only, stored as YYYY-MM-DD in UTC so the day never shifts with the editor's time zone.
+      - { name: date, label: First published, widget: datetime, type: date, format: YYYY-MM-DD, picker_utc: true }
+      - { name: updated, label: Updated, widget: datetime, type: date, format: YYYY-MM-DD, picker_utc: true, required: false, hint: Only for a substantial revision. }
+      - name: pillar
+        label: Topic
+        widget: select
+        options:
+          - { label: "Security & Privacy", value: security }
+          - { label: "OSINT & Intelligence", value: osint }
+          - { label: "AI Agents & Engineering", value: ai }
+          - { label: "Building Companies", value: building }
+          - { label: Radio, value: radio }
+      - { name: tags, label: Tags, widget: list, required: false, hint: Lowercase. }
+      - { name: layout, label: Layout, widget: hidden, default: standard }
+      - { name: draft, label: Draft, widget: hidden, default: false }
+      - { name: toc, label: Table of contents, widget: boolean, default: false, hint: Lists the main (H2) sections beside the article. }
+      # Raw mode first: the rich text editor may rewrite task lists and alerts.
+      - { name: body, label: Body, widget: markdown, modes: [raw, rich_text] }
+
+  - name: pages
+    label: Pages
+    files:
+      - name: about
+        label: About
+        file: src/content/pages/about.md
+        format: frontmatter
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: updated, label: Updated, widget: datetime, type: date, format: YYYY-MM-DD, picker_utc: true }
+          - { name: description, label: Introduction, widget: text, hint: Shown under the title and used as the search description. }
+          - { name: body, label: Body, widget: markdown, modes: [raw, rich_text] }
+
+  - name: data
+    label: Data
+    files:
+      - name: work
+        label: Work
+        file: src/data/work.yaml
+        format: yaml
+        fields:
+          - name: entries
+            label: Entries
+            widget: list
+            root: true
+            summary: "{{name}} · {{kind}}"
+            fields:
+              - { name: name, label: Name, widget: string }
+              - { name: kind, label: Kind, widget: string, hint: "For example: Project, Product, Open hardware" }
+              - { name: role, label: Role, widget: string }
+              - { name: status, label: Status, widget: string, required: false, hint: "For example: In development" }
+              - { name: summary, label: Home page line, widget: string, required: false }
+              - { name: description, label: Description, widget: text }
+              - name: links
+                label: Links
+                widget: list
+                required: false
+                summary: "{{label}}"
+                fields:
+                  - { name: label, label: Label, widget: string }
+                  - { name: href, label: URL, widget: string, hint: "https://… or /writing/<slug>/" }
+      - name: uses
+        label: Uses
+        file: src/data/uses.yaml
+        format: yaml
+        fields:
+          - name: groups
+            label: Groups
+            widget: list
+            root: true
+            summary: "{{group}}"
+            fields:
+              - { name: group, label: Group, widget: string }
+              - name: items
+                label: Items
+                widget: list
+                summary: "{{name}}"
+                fields:
+                  - { name: name, label: Name, widget: string }
+                  - { name: href, label: URL, widget: string, pattern: ["^https?://", "Must start with https://"] }
+                  - { name: note, label: Note, widget: string }

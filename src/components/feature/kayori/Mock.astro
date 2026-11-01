@@ -1,0 +1,52 @@
+---
+// Frame for a Kayori mock: a figure with a window bar, an optional case tab
+// strip and a caption. The window bar and tab strip are pictures and are
+// hidden from assistive technology; the caption says it is a mock and what to try.
+//   <Mock crumb="Feed" tab="Feed" label="Mock of the feed"> body <Fragment slot="caption">…</Fragment></Mock>
+import "./kayori.css";
+
+interface Props {
+  /** Where the mock is in the app, shown in the window bar ("Feed", "Cases / …"). */
+  crumb: string;
+  /** Text after the crumb, in muted type. */
+  sub?: string;
+  /** Active case tab. Omit for screens outside a case. */
+  tab?: string;
+  /** Accessible name for the figure's interactive area. */
+  label: string;
+  class?: string;
+}
+const { crumb, sub, tab, label, class: cls } = Astro.props;
+
+const groups: { name?: string; tabs: string[] }[] = [
+  { tabs: ["Overview"] },
+  { name: "Collection", tabs: ["Collectors", "Watchlists", "Feed"] },
+  { name: "Processing", tabs: ["Processors", "Alerts"] },
+  { name: "Analysis", tabs: ["Entities", "Graph", "Notes"] },
+  { tabs: ["Activity"] },
+];
+---
+<figure class:list={["km wide", cls]}>
+  <div class="km-win">
+    <div class="km-bar" aria-hidden="true">
+      <span class="km-crumb">{crumb}{sub && <span> / {sub}</span>}</span>
+      <span class="km-flag">Mock</span>
+    </div>
+    {tab && (
+      <div class="km-tabs" aria-hidden="true">
+        {groups.map((g) => (
+          <div class:list={["km-tabgroup", { "has-on": g.tabs.includes(tab) }]}>
+            <span class="km-tabgroup-label">{g.name ?? " "}</span>
+            <span class="km-tabgroup-tabs">
+              {g.tabs.map((t) => <span class:list={["km-tab", { "is-on": t === tab }]}>{t}</span>)}
+            </span>
+          </div>
+        ))}
+      </div>
+    )}
+    <div class="km-body" role="group" aria-label={label}>
+      <slot />
+    </div>
+  </div>
+  <figcaption class="km-cap"><slot name="caption" /></figcaption>
+</figure>

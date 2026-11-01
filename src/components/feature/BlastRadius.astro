@@ -1,0 +1,148 @@
+---
+// Blast-radius rings plus a 24-hour timeline, for use as the "graphic" slot
+// of <Scrolly>. Everything is driven by the Scrolly root's state tokens:
+//   php         PHP services turn red; services without PHP turn hollow
+//   rank        the inner ring (control plane) is highlighted
+//   wall        the allow-list at the edge is drawn
+//   ini         status: "Upload progress off"
+//   hold        the "agent waits for me" flag shows
+//   release     status: "PHP fix released"
+//   second      status: "Second server checked"
+//   patch-core  the control plane is patched (inner ring and dot go solid)
+//   patch-app   the app is patched (middle ring and dot go solid)
+// --scrolly-progress (0 to 1) fills the timeline; it maps to 00:00-24:00 UTC.
+interface Props {
+  /** Prefix for the SVG title and desc ids; set it if a page has more than one diagram. */
+  id?: string;
+  /** Clock text shown without JavaScript (use the last step's label). */
+  label?: string;
+  /** Names the span of the timeline, shown at the right of the clock. */
+  day?: string;
+  /** Hour (0-24, UTC) of a fixed marker on the timeline, such as the patch release. */
+  markerHour?: number;
+  markerLabel?: string;
+}
+const { id = "br", label = "", day = "21 Oct, UTC", markerHour = 14, markerLabel = "Fix released" } = Astro.props;
+const markerPct = (markerHour / 24) * 100;
+const status = [
+  ["wall", "Edge allow-list"],
+  ["ini", "Upload progress off"],
+  ["release", "PHP fix released"],
+  ["second", "Second server checked"],
+  ["patch-core", "Control plane patched"],
+  ["patch-app", "App patched"],
+];
+---
+<figure class="br" data-blast-radius>
+  <svg viewBox="0 0 400 400" role="img" aria-labelledby={`${id}-title ${id}-desc`}>
+    <title id={`${id}-title`}>Blast-radius diagram</title>
+    <desc id={`${id}-desc`}>Three rings around one server. The inner ring is the control plane, which deploys everything else. The middle ring is the apps and their data. The outer ring is the public routes through the reverse proxy. A dashed circle outside the rings is the allow-list at the edge. Two services run PHP: the control plane and one app. By the end of the day both are patched and the allow-list stays in place.</desc>
+    <circle class="br-wall" cx="200" cy="200" r="190" />
+    <circle class="br-ring" data-ring="outer" cx="200" cy="200" r="172" />
+    <circle class="br-ring" data-ring="middle" cx="200" cy="200" r="118" />
+    <circle class="br-ring" data-ring="inner" cx="200" cy="200" r="64" />
+    <text class="br-label" data-ring="outer" x="200" y="60" text-anchor="middle">Public routes</text>
+    <text class="br-label" data-ring="middle" x="200" y="114" text-anchor="middle">Apps and data</text>
+    <text class="br-label" data-ring="inner" x="200" y="228" text-anchor="middle"><tspan x="200">Control</tspan><tspan x="200" dy="15">plane</tspan></text>
+    <circle class="br-dot" data-php data-dot="core" cx="200" cy="196" r="10" />
+    <circle class="br-dot" data-php data-dot="app" cx="115" cy="225" r="8" />
+    <circle class="br-dot" cx="288" cy="215" r="8" />
+    <circle class="br-dot" cx="228" cy="288" r="8" />
+    <circle class="br-dot" cx="150" cy="140" r="8" />
+    <g class="br-flag">
+      <rect x="110" y="318" width="180" height="30" />
+      <text x="200" y="338" text-anchor="middle">Agent waits for me</text>
+    </g>
+  </svg>
+  <div class="br-time" aria-hidden="true">
+    <p class="br-clock"><span data-scrolly-text="label">{label}</span><span class="br-day">{day}</span></p>
+    <div class="br-track">
+      <span class="br-fill"></span>
+      <span class="br-marker" style={`left: ${markerPct}%`}></span>
+    </div>
+    <div class="br-ticks">
+      <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+    </div>
+    <p class="br-marker-label"><span style={`left: ${markerPct}%`}>{markerLabel} {String(markerHour).padStart(2, "0")}:00</span></p>
+  </div>
+  <ul class="br-status" aria-hidden="true">
+    {status.map(([token, text]) => <li data-on={token}>{text}</li>)}
+  </ul>
+  <figcaption><slot /></figcaption>
+</figure>
+
+
+<style>
+  .br { margin: 0; max-width: 34rem; margin-inline: auto; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+  .br-ring { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+  .br-label { font: 500 13px var(--mono); letter-spacing: .06em; text-transform: uppercase; fill: var(--muted); }
+  .br-dot { fill: var(--muted); stroke: var(--muted); stroke-width: 2; }
+  .br-wall { fill: none; stroke: var(--text); stroke-width: 3; stroke-dasharray: 7 6; opacity: 0; }
+  .br-flag { opacity: 0; }
+  .br-flag rect { fill: var(--warn-bg); stroke: var(--warn-text); stroke-width: 1.5; }
+  .br-flag text { font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; fill: var(--warn-text); }
+
+  /* php: which services run the flawed code */
+  :global([data-scrolly][data-state~="php"]) .br-dot { fill: var(--bg); }
+  :global([data-scrolly][data-state~="php"]) .br-dot[data-php] { fill: var(--accent); stroke: var(--accent); }
+  /* rank: the control plane goes first */
+  :global([data-scrolly][data-state~="rank"]) .br-ring[data-ring="inner"] { stroke: var(--accent); stroke-width: 3.5; }
+  :global([data-scrolly][data-state~="rank"]) .br-label[data-ring="inner"] { fill: var(--accent); }
+  /* wall: allow-list at the reverse proxy */
+  :global([data-scrolly][data-state~="wall"]) .br-wall { opacity: 1; }
+  /* hold: the agent's permission check */
+  :global([data-scrolly][data-state~="hold"]) .br-flag { opacity: 1; }
+  /* patched: solid, in the text colour */
+  :global([data-scrolly][data-state~="patch-core"]) .br-ring[data-ring="inner"] { stroke: var(--text); stroke-width: 3; }
+  :global([data-scrolly][data-state~="patch-core"]) .br-label[data-ring="inner"] { fill: var(--text); }
+  :global([data-scrolly][data-state~="patch-core"]) .br-dot[data-dot="core"] { fill: var(--text); stroke: var(--text); }
+  :global([data-scrolly][data-state~="patch-app"]) .br-ring[data-ring="middle"] { stroke: var(--text); stroke-width: 3; }
+  :global([data-scrolly][data-state~="patch-app"]) .br-label[data-ring="middle"] { fill: var(--text); }
+  :global([data-scrolly][data-state~="patch-app"]) .br-dot[data-dot="app"] { fill: var(--text); stroke: var(--text); }
+
+  /* timeline */
+  .br-time { margin-top: var(--s4); }
+  .br-clock { display: flex; justify-content: space-between; gap: var(--s3); font: 500 15px/1.3 var(--mono); letter-spacing: .04em; margin: 0 0 var(--s2); color: var(--text); }
+  .br-day { color: var(--muted); font-weight: 400; white-space: nowrap; }
+  .br-track { position: relative; height: 6px; background: var(--line); }
+  .br-fill { position: absolute; inset: 0; background: var(--accent); transform-origin: left center; transform: scaleX(var(--scrolly-progress, 1)); }
+  .br-marker { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--text); }
+  .br-ticks { display: flex; justify-content: space-between; font: 400 12px/1 var(--mono); color: var(--muted); margin-top: var(--s2); }
+  .br-marker-label { position: relative; height: 1em; font: 500 12px/1 var(--mono); color: var(--muted); margin: var(--s2) 0 0; }
+  .br-marker-label span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+
+  /* status list */
+  .br-status { list-style: none; margin: var(--s4) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s1) var(--s4); font: 400 13px/1.4 var(--mono); }
+  .br-status li { margin: 0; color: var(--muted); display: flex; gap: var(--s2); align-items: baseline; }
+  .br-status li::before { content: ""; flex: none; width: 9px; height: 9px; border: 1.5px solid var(--muted); transform: translateY(1px); }
+  :global([data-scrolly][data-state~="wall"]) .br-status [data-on="wall"],
+  :global([data-scrolly][data-state~="ini"]) .br-status [data-on="ini"],
+  :global([data-scrolly][data-state~="release"]) .br-status [data-on="release"],
+  :global([data-scrolly][data-state~="second"]) .br-status [data-on="second"],
+  :global([data-scrolly][data-state~="patch-core"]) .br-status [data-on="patch-core"],
+  :global([data-scrolly][data-state~="patch-app"]) .br-status [data-on="patch-app"] { color: var(--text); }
+  :global([data-scrolly][data-state~="wall"]) .br-status [data-on="wall"]::before,
+  :global([data-scrolly][data-state~="ini"]) .br-status [data-on="ini"]::before,
+  :global([data-scrolly][data-state~="release"]) .br-status [data-on="release"]::before,
+  :global([data-scrolly][data-state~="second"]) .br-status [data-on="second"]::before,
+  :global([data-scrolly][data-state~="patch-core"]) .br-status [data-on="patch-core"]::before,
+  :global([data-scrolly][data-state~="patch-app"]) .br-status [data-on="patch-app"]::before { background: var(--accent); border-color: var(--accent); }
+
+  figcaption { font-size: 14px; color: var(--muted); margin-top: var(--s4); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .br-ring, .br-label, .br-dot, .br-wall, .br-flag, .br-fill, .br-status li, .br-status li::before {
+      transition: stroke 400ms var(--ease), stroke-width 400ms var(--ease), fill 400ms var(--ease), opacity 400ms var(--ease), transform 500ms var(--ease), color 400ms var(--ease), background-color 400ms var(--ease), border-color 400ms var(--ease);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .br { max-width: 24rem; }
+    svg { max-height: calc(46vh - 76px); }
+    .br-time { margin-top: var(--s2); }
+    .br-marker-label, .br-status, figcaption { display: none; }
+    .br-clock { font-size: 14px; }
+  }
+</style>

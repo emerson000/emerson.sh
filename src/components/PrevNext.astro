@@ -1,0 +1,17 @@
+---
+import { postUrl, type Post } from "../lib/site";
+interface Props { older?: Post; newer?: Post }
+const { older, newer } = Astro.props;
+---
+<nav class="next" aria-label="More writing">
+  {older ? (
+    <a href={postUrl(older)}><span class="meta">Previous</span><span class="t">{older.data.title}</span></a>
+  ) : (
+    <a href="/writing/"><span class="meta">More</span><span class="t">All writing</span></a>
+  )}
+  {newer ? (
+    <a class="later" href={postUrl(newer)}><span class="meta">Next</span><span class="t">{newer.data.title}</span></a>
+  ) : older ? (
+    <a class="later" href="/writing/"><span class="meta">More</span><span class="t">All writing</span></a>
+  ) : null}
+</nav>

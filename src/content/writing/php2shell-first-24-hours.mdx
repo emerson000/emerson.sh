@@ -1,0 +1,202 @@
+---
+title: "PHP2Shell: the first 24 hours of a critical RCE"
+description: "A critical flaw in PHP, two exposed services and no patch yet. What I closed first, why the order mattered, and the notice I sent."
+date: 2026-10-28
+pillar: security
+tags: [incident-response, php, vulnerability-management, reverse-proxy]
+layout: feature
+---
+
+import Scrolly from "../../components/feature/Scrolly.astro";
+import Step from "../../components/feature/Step.astro";
+import BlastRadius from "../../components/feature/BlastRadius.astro";
+import Pull from "../../components/feature/Pull.astro";
+import Redacted from "../../components/Redacted.astro";
+
+<p class="dropcap">On Tuesday, 20 October 2026, details leaked of two flaws in PHP, the language behind most of the websites in the world. Researchers called the pair PHP2Shell (CVE-2026-109618 and CVE-2026-109619, both rated critical at 9.2 out of 10). Each one is a remote code execution flaw, or RCE: a stranger on the internet can send a request and run their own commands on your server, with no password. The PHP project said fixed versions would ship the next day at 14:00 UTC. Security vendors were already reporting attack attempts.</p>
+
+I run a small set of servers for <Redacted size="l" />. On one of them, two services run PHP, and that morning anyone on the internet could reach both. This is the first day of the response, in the order I did things. The order mattered more than the speed.
+
+## What was exposed
+
+Two services on the same host ran PHP:
+
+- **<Redacted />**, the self-hosted platform that deploys every other app on the host. Its sign-in page answered anyone on the internet.
+- **A project-management app.** Every page sat behind my single sign-on (SSO) gate, except one API route that skipped it.
+
+The two were not equal risks. <Redacted /> holds the Docker socket, the host's SSH keys and the secrets of every app it deploys. The Docker socket is the control channel for all the containers on the host. So whoever runs code inside <Redacted /> controls the whole host. Code execution in the project app would give an attacker that app, its database and a foothold on the internal network. Bad, but smaller.
+
+Nothing else on the host ran PHP, and the host itself had none.
+
+There was also no complete workaround. The interim advice was to turn off one PHP feature, session upload progress, and to limit file uploads. Both lowered the risk. Neither removed it.
+
+## The day, hour by hour
+
+Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. In the diagram, red dots run the flawed PHP, hollow dots run no PHP, and solid dark dots are patched. The dashed circle is the allow-list at the reverse proxy, the server that receives every request before the apps do.
+
+<Scrolly state="php rank wall ini release second patch-core patch-app" progress={0.85} stepsLabel="Timeline of 21 October">
+  <BlastRadius slot="graphic" label="20:24 UTC" markerHour={14} markerLabel="PHP fix">
+    Rings are ordered by blast radius: whoever controls the inner ring controls everything outside it.
+  </BlastRadius>
+
+  <Step label="20 Oct" title="The leak" progress={0} describe="all services are grey; nothing is ranked yet.">
+
+  Details of two PHP flaws leak. The PHP project announces an out-of-band security release for 14:00 UTC the next day. Until then there is no patch, only settings that lower the risk.
+
+  </Step>
+
+  <Step label="11:10 UTC" title="Look before you touch" state="php" progress={0.465} describe="the two PHP services turn red; the other services are hollow.">
+
+  I start with a read-only inspection: which containers run PHP, which PHP settings are on, how the reverse proxy routes traffic, and which ports listen. Two services run PHP. Nothing else does.
+
+  </Step>
+
+  <Step label="11:10–11:20 UTC" title="Rank by blast radius, not by count" state="php rank" progress={0.47} describe="the inner ring, the control plane, is highlighted.">
+
+  Two services, but not two equal risks. The deployment platform holds the Docker socket. If it falls, every app falls with it. It goes first. The project app comes second.
+
+  </Step>
+
+  <Step label="~11:20 UTC" title="Close it at the edge" state="php rank wall" progress={0.472} describe="a dashed wall appears around all three rings.">
+
+  There is no patch, so I take away reach instead. Two rule files at the reverse proxy take effect without a restart. The dashboard now answers only my workstation. Webhooks from my Git server and from GitHub still get through, each on its own path. The API route that skipped sign-in now goes through the SSO gate.
+
+  Everyone else gets 403 Forbidden before the request reaches PHP. At about 11:22 I test from each source, and each one gets the answer it should.
+
+  </Step>
+
+  <Step label="11:24 UTC" title="Turn off what you can" state="php rank wall ini" progress={0.475} describe="the status list shows upload progress off.">
+
+  I turn off session upload progress in the deployment platform with a small PHP settings file, and recreate its container. PHP now reports the setting as Off. This lowers the risk. It does not remove it.
+
+  </Step>
+
+  <Step label="~11:29 UTC" title="The agent stops and asks" state="php rank wall ini hold" progress={0.479} describe="a flag reads: agent waits for me.">
+
+  I do this work with a coding agent. The recreated container comes up unhealthy: the deployment files on disk are for a newer release than the one that runs. The agent proposes to put back the older files and recreate the container again. Its permission check blocks that change and waits for me.
+
+  The dashboard, its API and every hosted app still work. A hurried rollback on a live control plane is the bigger risk, so the change waits. It is never needed: the patched upgrade that evening replaces the container.
+
+  </Step>
+
+  <Step label="14:00 UTC" title="PHP ships the fix" state="php rank wall ini release" progress={0.583} describe="the timeline reaches the release marker.">
+
+  PHP releases 8.2.35, 8.3.36, 8.4.27 and 8.5.12. Now I wait for the projects that package PHP. The deployment platform and the app image each have to ship a build on a fixed version.
+
+  </Step>
+
+  <Step label="14:50–15:10 UTC" title="Check the second tier" state="php rank wall ini release second" progress={0.63} describe="the status list shows the second server checked.">
+
+  Another server I run also has PHP. It is not published to the internet: there are no port forwards and no remote-access features turned on. An attacker would need a foothold inside the network first. I inspect it read-only: the PHP processes, their child processes and the logs I have. I find no sign of misuse.
+
+  </Step>
+
+  <Step label="17:07–17:52 UTC" title="Patch the control plane" state="php rank wall ini release second patch-core" progress={0.744} describe="the inner ring and its dot turn solid: patched.">
+
+  At 17:07 the project app redeploys without the route that skipped sign-in. That gap is now closed in the app's own configuration, not only at the proxy. At 17:52 the deployment platform upgrades to <Redacted /> <Redacted size="s" label="redacted version" />, built that day on PHP 8.4.27. The container is healthy.
+
+  </Step>
+
+  <Step label="18:16 UTC" title="Test the wall again" state="php rank wall ini release second patch-core" progress={0.761} describe="no change: the wall stays in place.">
+
+  The upgrade moved one internal service to a new name. My edge rule for it still pointed at the old name, so the proxy dropped that rule. I fix it, then test again from outside the allow-list. The dashboard, its live updates and its terminal all answer 403, and the webhooks still arrive.
+
+  An upgrade can quietly undo a mitigation. Test it again after every change.
+
+  </Step>
+
+  <Step label="20:24 UTC" title="The last service patched" state="php rank wall ini release second patch-core patch-app" progress={0.85} describe="both rings and both PHP dots are solid: everything is patched, and the wall stays.">
+
+  The project app's maintainers publish their image again on PHP 8.3.36. I redeploy it. The container is healthy, every page and the API go to the sign-in page first, and upload progress stays off. Both PHP services now run fixed versions, a little over nine hours after I started.
+
+  </Step>
+</Scrolly>
+
+## Closing it at the edge
+
+The allow-list did the most work for the least effort. It took about ten minutes, needed no patch and no restart, and stopped every request from an unknown address before PHP saw it.
+
+I use Traefik as my reverse proxy. Traefik reads extra rules from files and picks them up without a restart, which is what made this a ten-minute fix. I left the existing routes alone and added one new file. It matches the same hostname at a higher priority, so its rules are checked first, and it puts an allow-list in front of the dashboard. Here is the pattern, with documentation addresses and an example domain:
+
+<div class="code-cap"><span>Traefik dynamic configuration (example)</span><span>YAML</span></div>
+
+```yaml
+# Matches the dashboard's hostname at a higher priority than the existing
+# routes, so these rules win. Unknown sources get 403 before PHP runs.
+http:
+  middlewares:
+    admin-only:
+      ipAllowList:
+        sourceRange:
+          - 198.51.100.7/32   # my workstation
+    github-hooks:
+      ipAllowList:
+        sourceRange:
+          # Stand-ins: copy the real "hooks" ranges from api.github.com/meta.
+          - 192.0.2.0/26
+          - 203.0.113.64/27
+
+  routers:
+    dashboard-guard:
+      rule: Host(`deploy.example.com`)
+      priority: 2000
+      entryPoints: [https]
+      middlewares: [admin-only]
+      service: dashboard@docker
+      tls: {}
+    github-webhooks:
+      rule: Host(`deploy.example.com`) && PathPrefix(`/webhooks/github/`)
+      priority: 2100
+      entryPoints: [https]
+      middlewares: [github-hooks]
+      service: dashboard@docker
+      tls: {}
+```
+
+Four things to check before you trust a rule like this:
+
+1. **The proxy must see the real client address.** If it only sees an internal address, an allow-list lets in everyone or no one. My workstation's single address matched, which proved the real addresses arrived.
+2. **Keep the paths that must stay open.** Webhooks from your Git server and from GitHub need their own routes. GitHub publishes its webhook source ranges at `api.github.com/meta`. Copy them when you write the rule, and refresh them later.
+3. **Plan for lockout.** If your own address changes, the dashboard answers 403 to you too. Know how to reach the server another way, and which line to edit.
+4. **Test from every side.** From the allowed address, from a refused one, and from each webhook source. Then test again after every upgrade.
+
+## The notice
+
+The same day I also sent a short notice to the people who use these services. It said three things: you are safe, you need to do nothing, and expect scam emails. Here it is, lightly edited for this page.
+
+<Pull label="The notice, 21 October 2026" caption="Sources given with the notice: the PHP project and W3Techs.">
+
+On October 20, details leaked about a serious flaw in PHP. PHP is software that runs most of the websites in the world. The flaw lets attackers take control of a website without a password, and attacks already started.
+
+The services you use are safe. Your portal, chat and sign-in do not use PHP. I closed my two internal PHP tools to the internet within hours, and I found no sign of misuse. You do not have to do anything.
+
+The rest of the internet is at risk. Many stores, blogs and other sites that you use will be slow to install the fix. Attackers will steal data from them and use it in fake emails for weeks or months.
+
+To stay safe:
+
+1. Do not click links in unexpected "security update" or "reset your password" emails.
+2. Use a different password for each account, and turn on two-step sign-in.
+3. If you own a website, ask your web host if it uses PHP and has the October 21 fix.
+
+I will never ask for your password or send you a link to fix this. If a message from me looks wrong, call the number that you already have for me.
+
+</Pull>
+
+What I left out matters as much as what I put in. There are no version numbers, no list of systems and no promise that nothing can ever go wrong. Most readers need to know one thing: do I have to act? The second paragraph answers that. The rest prepares them for what comes next, because the scam emails that follow a flaw like this reach far more people than the flaw itself.
+
+## What I would do again
+
+1. **Look before you touch.** Ten minutes of read-only inspection told me what ran PHP, what was reachable and what was not. Every later step depended on it.
+2. **Rank by blast radius, not by count.** Two exposed services is not two equal problems. Close the one that controls everything else first.
+3. **Take away reach before you can remove the flaw.** An allow-list at the proxy needs no patch. It also stays useful after the patch: a deployment dashboard has no reason to be public.
+4. **Keep a person in the loop for changes to the control plane.** The agent was fast, and its proposed rollback was reasonable. Its permission check still stopped it and waited for me. That pause cost nothing.
+5. **Test the mitigation again after every change.** My own rule broke during the upgrade. A second test found it within half an hour.
+6. **Tell people early, in plain words.** Say whether they must act, and warn them about what follows.
+
+## Sources
+
+- PHP project, "Upcoming Critical PHP Security Release", 20 October 2026, as quoted on the [oss-security mailing list](https://www.openwall.com/lists/oss-security/2026/10/20/34).
+- Help Net Security, [PHP2Shell vulnerabilities patched (CVE-2026-109618, CVE-2026-109619)](https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/), 21 October 2026.
+- Qualys, [PHP announces critical security release for two vulnerabilities](https://blog.qualys.com/vulnerabilities-threat-research/2026/10/20/php-announces-critical-security-release-for-two-vulnerabilities), 20 October 2026.
+- GitHub, [meta API](https://api.github.com/meta), for webhook source ranges.
+- W3Techs, [usage statistics of PHP](https://w3techs.com/technologies/details/pl-php).

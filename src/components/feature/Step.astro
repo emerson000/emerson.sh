@@ -1,0 +1,26 @@
+---
+// One step of a <Scrolly>. The body (default slot) is the text the reader
+// sees; it must make sense on its own, because screen readers and readers
+// without JavaScript get the steps as a plain list.
+interface Props {
+  /** Heading for the step. */
+  title: string;
+  /** Short label above the heading, such as a time ("11:24 UTC"). */
+  label?: string;
+  /** Space-separated state tokens the graphic shows while this step is active. */
+  state?: string;
+  /** 0 to 1: progress the graphic shows while this step is active (for example, time of day). */
+  progress?: number;
+  /** One sentence for screen readers saying what the graphic shows at this step. */
+  describe?: string;
+}
+const { title, label, state = "", progress = 0, describe } = Astro.props;
+---
+<li class="scrolly-step" data-state={state} data-progress={Math.min(1, Math.max(0, progress))} data-label={label ?? ""}>
+  <div class="scrolly-card">
+    {label && <p class="scrolly-clock">{label}</p>}
+    <h3>{title}</h3>
+    <slot />
+    {describe && <p class="sr-only">In the diagram: {describe}</p>}
+  </div>
+</li>

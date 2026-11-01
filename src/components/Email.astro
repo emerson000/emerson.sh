@@ -1,0 +1,20 @@
+---
+// An email address kept out of plain HTML to slow down address harvesters.
+// The page holds the address as HTML character codes (readable, not clickable)
+// plus a reversed base64 copy; a script swaps in a normal mailto: link.
+interface Props { address: string }
+const { address } = Astro.props;
+const encoded = [...address].map((c) => `&#${c.codePointAt(0)};`).join("");
+const scrambled = Buffer.from([...address].reverse().join("")).toString("base64");
+---
+<span class="email" data-email={scrambled} set:html={encoded} />
+
+<script>
+  document.querySelectorAll<HTMLElement>(".email[data-email]").forEach((el) => {
+    const address = [...atob(el.dataset.email!)].reverse().join("");
+    const link = document.createElement("a");
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+    el.replaceWith(link);
+  });
+</script>

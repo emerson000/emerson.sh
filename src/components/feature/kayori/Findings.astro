@@ -1,0 +1,154 @@
+---
+// Mock of pinned findings on the case Overview: tiles, critical first, a long
+// note on a double-width tile, and a reader sheet with Previous, Next and Close.
+// Without JavaScript the tiles are links to the full notes, printed below them.
+// With JavaScript the notes move into a native modal <dialog>.
+import Mock from "./Mock.astro";
+
+interface Props { id?: string }
+const { id = "kp" } = Astro.props;
+
+type Sec = { h: string; p: string };
+const notes: { kind: string; critical?: boolean; long?: boolean; title: string; sum: string; secs: Sec[]; meta: string }[] = [
+  {
+    kind: "Finding", critical: true, long: true, meta: "Updated 10:42",
+    title: "One certificate covers both lookalike domains",
+    sum: "The certificate on pellwood-recall.example also names pellwood-refunds.example. The emails and the refund page are one campaign.",
+    secs: [
+      { h: "What we found", p: "The TLS certificate served by pellwood-recall.example lists pellwood-refunds.example among its names. Both relationships are on the case graph." },
+      { h: "Evidence", p: "Two Certificate Issued For relationships, from the same certificate. The refund form is hosted on the second domain." },
+      { h: "Confidence", p: "Moderate. Whoever holds the key for one domain holds it for the other. The certificate does not say who that is." },
+      { h: "So what", p: "Treat the recall emails and the refund page as one campaign, and report both domains together." },
+    ],
+  },
+  {
+    kind: "Finding", meta: "Updated 11:20",
+    title: "Same WHOIS contact on the first domain",
+    sum: "reg@mailbox.example is the contact on pellwood-recall.example.",
+    secs: [
+      { h: "What we found", p: "reg@mailbox.example is the WHOIS contact on pellwood-recall.example. On its own this is weak, because privacy services reuse addresses. Beside the shared certificate it adds a little." },
+    ],
+  },
+  {
+    kind: "Report", meta: "Updated 16:05",
+    title: "Daily summary",
+    sum: "Bottom line, key judgments and gaps for today.",
+    secs: [
+      { h: "Bottom line", p: "A lookalike domain sends fake recall emails. A second domain collects card numbers. They are run together." },
+      { h: "Gaps", p: "Who registered the domains." },
+    ],
+  },
+];
+---
+<Mock crumb="Cases" sub="Pellwood refund lookalikes" tab="Overview" label="Pinned findings mock" class="kp" >
+  <div class="kp-band" data-findings>
+    <p class="kp-head"><span class="kp-htitle">Pinned findings</span> <span class="km-mono">{notes.length}</span> <span class="kp-crit">1 critical</span></p>
+    <div class="kp-tiles">
+      {notes.map((n, i) => (
+        <a class:list={["kp-tile", { "kp-long": n.long, "kp-tcrit": n.critical }]} href={`#${id}-n${i}`} data-open={i}>
+          <span class="kp-kind">{n.kind}{n.critical && <> · <span class="kp-critw">Critical</span></>}</span>
+          <span class="kp-ttitle">{n.title}</span>
+          <span class="kp-sum">{n.sum}</span>
+          {n.long && <span class="kp-secs">{n.secs.length} sections: {n.secs.map((s) => s.h).join(" · ")}</span>}
+          <span class="kp-meta">{n.meta}</span>
+        </a>
+      ))}
+    </div>
+
+    <div class="kp-static" data-static>
+      {notes.map((n, i) => (
+        <article class="kp-reader" id={`${id}-n${i}`} data-note tabindex="-1">
+          <p class="kp-kind">{n.kind}{n.critical && <> · <span class="kp-critw">Critical</span></>}</p>
+          <h3>{n.title}</h3>
+          {n.secs.map((s) => (<><h4>{s.h}</h4><p>{s.p}</p></>))}
+        </article>
+      ))}
+    </div>
+
+    <dialog class="kp-sheet" aria-labelledby={`${id}-pos`} data-sheet>
+      <div class="kp-sbar">
+        <span class="km-mono" id={`${id}-pos`} data-pos>Pinned 1 of {notes.length}</span>
+        <button class="km-btn" type="button" data-step="-1">Previous</button>
+        <button class="km-btn" type="button" data-step="1">Next</button>
+        <button class="km-btn" type="button" data-close>Close</button>
+      </div>
+      <div class="kp-sbody" data-sbody></div>
+    </dialog>
+  </div>
+  <Fragment slot="caption"><strong>Mock of pinned findings on the case Overview.</strong> Open a tile to read the note, then step through the others.</Fragment>
+</Mock>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-findings]").forEach((band) => {
+    const sheet = band.querySelector<HTMLDialogElement>("[data-sheet]")!;
+    if (typeof sheet.showModal !== "function") return;
+    const body = band.querySelector<HTMLElement>("[data-sbody]")!;
+    const pos = band.querySelector<HTMLElement>("[data-pos]")!;
+    const notes = [...band.querySelectorAll<HTMLElement>("[data-note]")];
+    const tiles = [...band.querySelectorAll<HTMLAnchorElement>("[data-open]")];
+    notes.forEach((n) => { n.hidden = true; n.removeAttribute("id"); body.append(n); });
+    band.querySelector<HTMLElement>("[data-static]")!.remove();
+    let cur = 0;
+    let opener: HTMLElement | null = null;
+
+    function show(i: number) {
+      cur = (i + notes.length) % notes.length;
+      notes.forEach((n, j) => (n.hidden = j !== cur));
+      pos.textContent = `Pinned ${cur + 1} of ${notes.length}`;
+      sheet.setAttribute("aria-labelledby", pos.id);
+    }
+    tiles.forEach((t) => {
+      t.setAttribute("role", "button");
+      t.addEventListener("click", (e) => {
+        e.preventDefault();
+        opener = t;
+        show(Number(t.dataset.open));
+        sheet.showModal();
+        sheet.querySelector<HTMLButtonElement>("[data-close]")!.focus();
+      });
+      t.addEventListener("keydown", (e) => {
+        if (e.key === " ") { e.preventDefault(); t.click(); }
+      });
+    });
+    sheet.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((b) =>
+      b.addEventListener("click", () => show(cur + Number(b.dataset.step))),
+    );
+    sheet.querySelector("[data-close]")!.addEventListener("click", () => sheet.close());
+    sheet.addEventListener("click", (e) => { if (e.target === sheet) sheet.close(); });
+    sheet.addEventListener("close", () => (tiles[cur] ?? opener)?.focus());
+  });
+</script>
+
+<style>
+  .kp-band { padding: var(--s4); }
+  .kp-head { display: flex; align-items: baseline; gap: var(--s2); margin: 0 0 var(--s3); }
+  .kp-htitle { font-weight: 600; font-size: 16px; }
+  .kp-crit { color: var(--accent); font-weight: 600; font-size: 14px; }
+  .kp-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: var(--s3); }
+  .kp-tile { display: flex; flex-direction: column; gap: var(--s1); min-height: 11rem; padding: var(--s4); border: 1px solid var(--line-strong); color: var(--text); text-decoration: none; background: var(--bg); }
+  .kp-tile:hover { border-color: var(--text); background: var(--surface); color: var(--text); text-decoration: none; }
+  .kp-tile:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .kp-long { grid-column: span 2; }
+  .kp-tcrit { box-shadow: inset 3px 0 0 var(--accent); }
+  .kp-kind { font-size: 13px; color: var(--muted); margin: 0; }
+  .kp-critw { color: var(--accent); font-weight: 600; }
+  .kp-ttitle { font-weight: 600; font-size: 16px; line-height: 1.3; }
+  .kp-sum { font-size: 14px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .kp-secs { font-size: 13px; color: var(--muted); }
+  .kp-meta { margin-top: auto; font-size: 13px; color: var(--muted); }
+  @container (max-width: 560px) { .kp-long { grid-column: auto; } }
+
+  .kp-static { margin-top: var(--s5); border-top: 1px solid var(--line); }
+  .kp-reader { padding: var(--s4) 0; }
+  .kp-reader h3 { font: 600 22px/1.25 var(--body); margin: var(--s1) 0 var(--s3); }
+  .kp-reader h4 { font: 600 15px/1.3 var(--body); margin: var(--s3) 0 var(--s1); }
+  .kp-reader p { font: 16px/1.65 var(--display); margin: 0 0 var(--s2); max-width: 68ch; }
+  .kp-reader .kp-kind { font: 13px/1.4 var(--body); }
+
+  .kp-sheet { margin: 0 0 0 auto; height: 100%; max-height: none; width: min(44rem, 100%); max-width: 100%; padding: 0; border: 0; border-left: 1px solid var(--line-strong); background: var(--bg); color: var(--text); box-shadow: var(--shadow-overlay); font: 14px/1.5 var(--body); }
+  .kp-sheet::backdrop { background: #0000008c; }
+  .kp-sbar { position: sticky; top: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); background: var(--surface); border-bottom: 1px solid var(--line); }
+  .kp-sbar [data-pos] { margin-right: auto; color: var(--muted); }
+  .kp-sbody { padding: var(--s5) var(--s6); }
+  @media (max-width: 640px) { .kp-sbody { padding: var(--s4); } }
+</style>

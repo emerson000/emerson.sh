@@ -1,0 +1,26 @@
+---
+// A quoted document set apart from the article (a notice, an email, a memo).
+// Uses the shell's .pull rules; the body is the default slot.
+interface Props {
+  /** Mono label above the quote, such as "The notice, in full". */
+  label: string;
+  /** Optional source line under the quote. */
+  caption?: string;
+}
+const { label, caption } = Astro.props;
+---
+<figure class="pull pull-doc">
+  <p class="meta">{label}</p>
+  <blockquote>
+    <slot />
+  </blockquote>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .pull-doc { margin-inline: 0; }
+  .pull-doc blockquote { margin: 0; padding: 0; border: 0; font: inherit; font-style: normal; }
+  .pull-doc blockquote :global(ol) { font: 400 18px/1.55 var(--display); padding-left: 1.4em; margin: 0 0 var(--s4); }
+  .pull-doc blockquote :global(p:last-child) { margin-bottom: 0; }
+  .pull-doc figcaption { font-size: 14px; color: var(--muted); margin-top: var(--s4); }
+</style>

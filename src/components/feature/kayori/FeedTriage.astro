@@ -1,0 +1,192 @@
+---
+// Mock of the refreshed feed: a reporting list beside a reading pane, review
+// scope filters with counts, and the four triage actions. All data is invented.
+// Without JavaScript it shows the first item selected and the actions disabled.
+import Mock from "./Mock.astro";
+
+type State = "unread" | "review" | "flagged" | "linked";
+const items: { src: string; time: string; kind: string; title: string; sum: string; body: string; hit?: string; state: State }[] = [
+  {
+    src: "outdoorwire.example", time: "08:12", kind: "Article", state: "unread",
+    title: "Campers report fake recall refund emails",
+    sum: "Customers say an email offered a refund for a stove recall the maker never announced.",
+    body: "Several customers of Pellwood Outdoor say they received an email offering a refund for a camping stove recall. The company says it has announced no recall. The emails link to a refund form on a site that is not the company's.",
+    hit: "recall refund",
+  },
+  {
+    src: "social.example", time: "08:05", kind: "Post", state: "review",
+    title: "Got a “Pellwood recall refund” email. Is this real?",
+    sum: "A post with a screenshot. The sender is support@pellwood-recall.example.",
+    body: "A user shares a screenshot of the email. The sender address is support@pellwood-recall.example, and the button reads “Claim your refund”.",
+    hit: "recall refund",
+  },
+  {
+    src: "pellwood-refunds.example", time: "07:50", kind: "Web page", state: "unread",
+    title: "Claim your Pellwood refund",
+    sum: "Snapshot of a form that asks for a card number and an order reference.",
+    body: "A captured page with the company's name and colours. The form asks for a card number, its expiry date and an order reference.",
+  },
+  {
+    src: "pellwood-recall.example", time: "07:31", kind: "Domain", state: "unread",
+    title: "pellwood-recall.example",
+    sum: "Registered six days ago. Watched for DNS and WHOIS changes.",
+    body: "A domain one word away from the company's own. It was registered six days ago, and Kayori now checks its DNS and WHOIS records on a schedule.",
+  },
+  {
+    src: "trailnews.example", time: "07:02", kind: "Article", state: "unread",
+    title: "Spring trail openings across three parks",
+    sum: "Seasonal openings. Nothing to do with the case.",
+    body: "Three parks list the dates their high trails open this spring.",
+  },
+];
+const LABEL: Record<State, string> = { unread: "Unread", review: "Needs review", flagged: "Flagged", linked: "Linked" };
+const CASE = "Pellwood refund lookalikes";
+const first = items[0];
+const count = (s?: State) => items.filter((i) => !s || i.state === s).length;
+---
+<Mock crumb="Feed" label="Feed mock" class="kf">
+  <div class="kf-head">
+    <div class="kf-scope" role="group" aria-label="Review scope">
+      <button class="km-btn" type="button" data-scope="all" aria-pressed="true">All <span data-count="all">{count()}</span></button>
+      <button class="km-btn" type="button" data-scope="unread" aria-pressed="false">Unread <span data-count="unread">{count("unread")}</span></button>
+      <button class="km-btn" type="button" data-scope="review" aria-pressed="false">Needs review <span data-count="review">{count("review")}</span></button>
+    </div>
+  </div>
+  <div class="kf-panes">
+    <ul class="kf-list" aria-label="Feed items">
+      {items.map((it, i) => (
+        <li data-state={it.state}>
+          <button class="kf-row" type="button" aria-pressed={i === 0 ? "true" : "false"}
+            data-title={it.title} data-src={it.src} data-time={it.time} data-kind={it.kind} data-body={it.body} data-hit={it.hit ?? ""}>
+            <span class="kf-meta"><span>{it.src}</span><span class="km-mono">{it.time}</span><span class="km-chip">{it.kind}</span><span class="km-state" data-v={it.state}>{LABEL[it.state]}</span></span>
+            <span class="kf-title">{it.title}</span>
+            <span class="kf-sum">{it.sum}</span>
+            {it.hit && <span class="kf-hit">Watchlist: {it.hit}</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
+    <div class="kf-detail">
+      <p class="km-label"><span data-d="kind">{first.kind}</span> · <span data-d="src">{first.src}</span> · <span data-d="time">{first.time}</span> UTC</p>
+      <h3 class="kf-dtitle" data-d="title">{first.title}</h3>
+      <p class="km-reading kf-body" data-d="body">{first.body}</p>
+      <p class="kf-hit" data-d="hit">{first.hit ? `Watchlist: ${first.hit}` : ""}</p>
+      <p class="km-label">Triage actions</p>
+      <div class="kf-actions" role="group" aria-label="Triage actions">
+        <button class="km-btn" type="button" data-set="unread" disabled>Mark Unread</button>
+        <button class="km-btn" type="button" data-set="review" disabled>Needs Review</button>
+        <button class="km-btn" type="button" data-set="flagged" disabled>Flag</button>
+        <button class="km-btn" type="button" data-set="linked" disabled>Linked</button>
+      </div>
+      <p class="kf-status" role="status" data-d="status">State: <strong data-d="state">{LABEL[first.state]}</strong></p>
+      <p class="km-label">Linked cases</p>
+      <p class="kf-case" data-d="case" data-name={CASE}>Not linked</p>
+    </div>
+  </div>
+  <Fragment slot="caption"><strong>Mock of the feed, with invented data.</strong> Select an item, then set its triage state. The counts and the filters follow.</Fragment>
+</Mock>
+
+<script>
+  const LABEL: Record<string, string> = { unread: "Unread", review: "Needs review", flagged: "Flagged", linked: "Linked" };
+
+  document.querySelectorAll<HTMLElement>(".kf").forEach((root) => {
+    const rows = [...root.querySelectorAll<HTMLButtonElement>(".kf-row")];
+    const d = (k: string) => root.querySelector<HTMLElement>(`[data-d="${k}"]`)!;
+    const actions = [...root.querySelectorAll<HTMLButtonElement>("[data-set]")];
+    const scopes = [...root.querySelectorAll<HTMLButtonElement>("[data-scope]")];
+    let sel = rows[0];
+    let scope = "all";
+
+    const stateOf = (row: HTMLButtonElement) => row.closest("li")!.dataset.state!;
+
+    function counts() {
+      const states = rows.map(stateOf);
+      for (const s of ["all", "unread", "review"]) {
+        const n = s === "all" ? states.length : states.filter((x) => x === s).length;
+        root.querySelector(`[data-count="${s}"]`)!.textContent = String(n);
+      }
+    }
+
+    function filter() {
+      rows.forEach((r) => {
+        const li = r.closest("li")!;
+        li.hidden = scope !== "all" && stateOf(r) !== scope;
+      });
+    }
+
+    function show(row: HTMLButtonElement, announce = "") {
+      sel = row;
+      rows.forEach((r) => r.setAttribute("aria-pressed", String(r === row)));
+      const s = stateOf(row);
+      d("title").textContent = row.dataset.title!;
+      d("src").textContent = row.dataset.src!;
+      d("time").textContent = row.dataset.time!;
+      d("kind").textContent = row.dataset.kind!;
+      d("body").textContent = row.dataset.body!;
+      d("hit").textContent = row.dataset.hit ? `Watchlist: ${row.dataset.hit}` : "";
+      d("status").innerHTML = "";
+      d("status").append(announce || "State: ");
+      const strong = document.createElement("strong");
+      strong.textContent = LABEL[s];
+      if (!announce) d("status").append(strong);
+      const c = d("case");
+      c.textContent = s === "linked" ? `${c.dataset.name} · Active` : "Not linked";
+      actions.forEach((a) => a.setAttribute("aria-pressed", String(a.dataset.set === s)));
+    }
+
+    rows.forEach((r) => r.addEventListener("click", () => show(r)));
+    actions.forEach((a) => {
+      a.disabled = false;
+      a.addEventListener("click", () => {
+        const s = a.dataset.set!;
+        const li = sel.closest("li")!;
+        li.dataset.state = s;
+        const chip = li.querySelector<HTMLElement>(".km-state")!;
+        chip.dataset.v = s;
+        chip.textContent = LABEL[s];
+        counts();
+        show(sel, `State set to ${LABEL[s]}.`);
+      });
+    });
+    scopes.forEach((b) =>
+      b.addEventListener("click", () => {
+        scope = b.dataset.scope!;
+        scopes.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        filter();
+      }),
+    );
+    show(sel);
+  });
+</script>
+
+<style>
+  .kf-head { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); }
+  .kf-scope { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .kf-scope span { font-family: var(--mono); font-size: 13px; margin-left: 2px; }
+  .kf-panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .kf-list { list-style: none; margin: 0; padding: 0; border-right: 1px solid var(--line); }
+  .kf-list li { margin: 0; border-bottom: 1px solid var(--line); }
+  .kf-row { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; font: inherit; color: inherit; background: var(--bg); border: 0; border-left: 3px solid transparent; padding: var(--s3) var(--s4); cursor: pointer; }
+  .kf-row:hover { background: var(--surface); }
+  .kf-row[aria-pressed="true"] { background: var(--surface); border-left-color: var(--accent); }
+  .kf-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .kf-meta { display: flex; flex-wrap: wrap; gap: 2px var(--s3); align-items: baseline; font-size: 13px; color: var(--muted); }
+  .kf-title { font-weight: 600; }
+  .kf-sum { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .kf-hit { font: 500 12px/1.4 var(--mono); letter-spacing: .04em; color: var(--accent); margin: 0; }
+  .kf-hit:empty { display: none; }
+  .kf-detail { padding: var(--s4) var(--s5); min-width: 0; }
+  .kf-detail .km-label { margin-top: var(--s4); }
+  .kf-detail > .km-label:first-child { margin-top: 0; }
+  .kf-dtitle { font: 600 22px/1.25 var(--display); margin: var(--s2) 0 var(--s3); }
+  .kf-body { margin: 0 0 var(--s2); max-width: 60ch; }
+  .kf-actions { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .kf-status { margin: var(--s2) 0 0; font-size: 14px; color: var(--muted); }
+  .kf-status strong { color: var(--text); }
+  .kf-case { margin: 0; }
+  @container (max-width: 640px) {
+    .kf-panes { grid-template-columns: minmax(0, 1fr); }
+    .kf-list { border-right: 0; border-bottom: 1px solid var(--text); }
+    .kf-detail { padding: var(--s4); }
+  }
+</style>

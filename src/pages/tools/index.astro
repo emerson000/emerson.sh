@@ -1,0 +1,17 @@
+---
+import Base from "../../layouts/Base.astro";
+const tools = [
+  { href: "/tools/cryptonyms/", name: "Cryptonym generator", note: "Code names for projects and sensitive references: a two-letter digraph and a random word." },
+];
+---
+<Base title="Tools" description="Small browser utilities. Everything runs in your browser.">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Tools</h1>
+      <p class="lede">Small utilities I wanted for myself. Everything runs in your browser; nothing is sent anywhere.</p>
+    </div>
+    <ul class="tool-index">
+      {tools.map((t) => <li><a href={t.href}>{t.name}</a><p>{t.note}</p></li>)}
+    </ul>
+  </div>
+</Base>

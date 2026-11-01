@@ -1,0 +1,15 @@
+# Old Next.js URLs (before November 2026). Permanent redirects.
+/favicon.ico                 /favicon.svg                  301
+/blog/cryptonyms/nouns.json  /tools/cryptonyms/nouns.json  301
+/blog/cryptonyms             /tools/cryptonyms/            301
+/blog/cryptonyms/            /tools/cryptonyms/            301
+/blog/tags                   /writing/                     301
+/blog/tags/*                 /writing/                     301
+/blog                        /writing/                     301
+/blog/                       /writing/                     301
+/blog/:slug                  /writing/:slug/               301
+/blog/:slug/                 /writing/:slug/               301
+/lists/software              /uses/                        301
+/lists/software/             /uses/                        301
+/lists                       /uses/                        301
+/lists/                      /uses/                        301

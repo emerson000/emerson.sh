@@ -1,0 +1,42 @@
+# Uses page, migrated from the old /lists/software/ page. Groups and items show in this order.
+- group: Communication
+  items:
+    - name: HEY
+      href: https://hey.com
+      note: Email with a screener that keeps the inbox for people.
+    - name: Signal
+      href: https://signal.org
+      note: End-to-end encrypted messaging. The default for anything sensitive.
+- group: Development
+  items:
+    - name: Bruno
+      href: https://www.usebruno.com/
+      note: API client that stores collections as plain files in git.
+    - name: Docker
+      href: https://www.docker.com/
+      note: Containers for everything self-hosted.
+    - name: ImHex
+      href: https://github.com/WerWolv/ImHex
+      note: Hex editor with a pattern language for binary formats.
+    - name: Visual Studio Code
+      href: https://code.visualstudio.com/
+      note: General-purpose code editor.
+- group: Productivity
+  items:
+    - name: Affinity
+      href: https://affinity.serif.com/
+      note: Graphic design apps. A good alternative to Adobe.
+    - name: NAPS2
+      href: https://www.naps2.com/
+      note: Scanning to searchable PDF.
+    - name: Obsidian
+      href: https://obsidian.md/
+      note: Notes and a personal knowledge base in Markdown.
+    - name: SumatraPDF
+      href: https://www.sumatrapdfreader.org/free-pdf-reader
+      note: Fast PDF and e-book viewer.
+- group: Utilities
+  items:
+    - name: Everything
+      href: https://www.voidtools.com/
+      note: Finds files and folders by name, instantly.

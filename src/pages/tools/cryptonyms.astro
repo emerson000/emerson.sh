@@ -1,0 +1,140 @@
+---
+import Base from "../../layouts/Base.astro";
+const digraphs = ["AE", "JM", "KU", "LC", "ZR"];
+---
+<Base title="Cryptonym generator" description="Generate code names for projects and sensitive references: a two-letter digraph and a random word. Runs in your browser.">
+  <div class="wrap">
+    <div class="page-head">
+      <p class="crumbs"><a href="/tools/">Tools</a></p>
+      <h1 style="margin-top: var(--s3)">Cryptonym generator</h1>
+      <p class="lede">Code names for projects and sensitive references, built the way intelligence agencies did: a two-letter digraph and a random word. Everything runs in your browser.</p>
+    </div>
+    <section class="tool" aria-labelledby="tool-title">
+      <h2 id="tool-title" class="sr-only">Generator</h2>
+      <noscript><p>The generator needs JavaScript. The word list is at <a href="/tools/cryptonyms/nouns.json">/tools/cryptonyms/nouns.json</a>.</p></noscript>
+      <form id="crypto-form" class="tool-form">
+        <div class="tool-row">
+          <div>
+            <label for="digraph">Digraph</label>
+            <select id="digraph" name="digraph">
+              <option value="">None</option>
+              <option value="rand" selected>Random</option>
+              {digraphs.map((d) => <option>{d}</option>)}
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div id="custom-wrap" hidden>
+            <label for="custom">Custom digraph</label>
+            <input id="custom" name="custom" type="text" inputmode="text" pattern="[A-Za-z]{2}" autocomplete="off" spellcheck="false" placeholder="AB" aria-describedby="custom-hint">
+            <p class="hint" id="custom-hint">Two letters</p>
+          </div>
+          <div>
+            <label for="maxlen">Max word length</label>
+            <input id="maxlen" name="maxlen" type="number" min="3" max="15" value="8" inputmode="numeric">
+          </div>
+          <div>
+            <label for="count">How many</label>
+            <select id="count" name="count">
+              <option value="1" selected>1</option>
+              <option value="26">26 (one per letter)</option>
+              <option value="52">52</option>
+              <option value="78">78</option>
+            </select>
+          </div>
+        </div>
+        <output class="tool-out" id="crypto-out" for="digraph custom maxlen count" aria-live="polite">—</output>
+        <div class="tool-row">
+          <button class="btn" type="submit" id="gen">Generate</button>
+          <button class="btn secondary" type="button" id="copy" disabled>Copy</button>
+          <span class="tool-status" id="crypto-status" role="status"></span>
+        </div>
+      </form>
+      <ul class="history" id="history" aria-label="Recent names"></ul>
+    </section>
+
+    <div class="prose" style="margin-top: var(--s7)">
+      <h2 id="background">Background</h2>
+      <p>The CIA uses cryptonyms to conceal the identity of assets, people, places and other sensitive entities in documents. A cryptonym may begin with a two-letter digraph, or prefix. The digraph groups cryptonyms by region, location, operation or another purpose.</p>
+      <p>Using cryptonyms in sensitive communications is a simple tradecraft technique. It works best when combined with other practices such as compartmentalization and encryption.</p>
+      <h2 id="examples">Examples</h2>
+      <p>The Mary Ferrell Foundation maintains a <a href="https://www.maryferrell.org/php/cryptdb.php">database</a> of known CIA cryptonyms. This is an example of one in use:</p>
+      <blockquote><p>IF SHIPMENT NOT ALREADY EN ROUTE, PLS FORWARD TO JMWAVE SOONEST.</p></blockquote>
+      <p>The quote is from a <a href="https://www.maryferrell.org/showDoc.html?docId=32627#relPageId=2">cable</a> that refers to <code>JMWAVE</code>. The digraph <code>JM</code> is for Cuba, and <code>WAVE</code> refers to the Miami station.</p>
+      <h2 id="how">How the generator works</h2>
+      <p>Words come from a list of about 960 common English nouns (<a href="/tools/cryptonyms/nouns.json">nouns.json</a>), with proper nouns removed. Names are picked with your browser's cryptographic random number generator. When you ask for more than one, it takes one word per starting letter in turn, so the list covers the alphabet, and never repeats a word.</p>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import { cryptonyms } from "../../scripts/cryptonyms";
+
+  const form = document.getElementById("crypto-form") as HTMLFormElement;
+  const out = document.getElementById("crypto-out") as HTMLOutputElement;
+  const copyBtn = document.getElementById("copy") as HTMLButtonElement;
+  const status = document.getElementById("crypto-status") as HTMLElement;
+  const hist = document.getElementById("history") as HTMLUListElement;
+  const digraph = document.getElementById("digraph") as HTMLSelectElement;
+  const customWrap = document.getElementById("custom-wrap") as HTMLElement;
+  const custom = document.getElementById("custom") as HTMLInputElement;
+
+  let words: string[] | null = null;
+  let result: string[] = [];
+  let recent: string[] = [];
+
+  digraph.addEventListener("change", () => {
+    customWrap.hidden = digraph.value !== "custom";
+    custom.required = digraph.value === "custom";
+    if (!customWrap.hidden) custom.focus();
+  });
+  custom.addEventListener("input", () => (custom.value = custom.value.replace(/[^a-z]/gi, "").toUpperCase().slice(0, 2)));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    status.textContent = "";
+    try {
+      if (!words) {
+        const res = await fetch("/tools/cryptonyms/nouns.json");
+        if (!res.ok) throw new Error(String(res.status));
+        words = ((await res.json()) as { nouns: string[] }).nouns;
+      }
+    } catch {
+      status.textContent = "Couldn't load the word list. Check your connection and try again.";
+      return;
+    }
+    const sel = digraph.value;
+    result = cryptonyms(words, {
+      digraph: sel === "custom" ? custom.value : sel,
+      maxLength: Number((document.getElementById("maxlen") as HTMLInputElement).value) || 8,
+      count: Number((document.getElementById("count") as HTMLSelectElement).value) || 1,
+    });
+    if (!result.length) {
+      out.classList.remove("many");
+      out.textContent = "—";
+      copyBtn.disabled = true;
+      status.textContent = "No words that short. Raise the maximum length.";
+      return;
+    }
+    if (result.length === 1) {
+      out.classList.remove("many");
+      out.textContent = result[0];
+      recent = [result[0], ...recent.filter((n) => n !== result[0])].slice(0, 7);
+      hist.replaceChildren(...recent.slice(1).map((n) => Object.assign(document.createElement("li"), { textContent: n })));
+    } else {
+      out.classList.add("many");
+      out.replaceChildren(...result.map((n) => Object.assign(document.createElement("span"), { textContent: n })));
+      status.textContent = `${result.length} names.`;
+    }
+    copyBtn.disabled = false;
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(result.join("\n"));
+      status.textContent = "Copied.";
+    } catch {
+      status.textContent = "Couldn't copy. Select the names and press Ctrl+C.";
+    }
+  });
+</script>

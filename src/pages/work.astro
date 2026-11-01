@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { liveLinks } from "../lib/links";
+
+const work = await Promise.all(
+  (await getCollection("work"))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (w) => ({ ...w, links: await liveLinks(w.data.links) })),
+);
+const external = (href: string) => /^https?:\/\//.test(href);
+---
+<Base title="Work" description="Things I've founded or built outside my day job: Covert Signals, Kayori and CommCrate.">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Work</h1>
+      <p class="lede">Things I've founded or built outside my day job. Each one exists because I needed it first.</p>
+    </div>
+    <div class="entries">
+      {work.map((w) => {
+        const site = w.links.find((l) => external(l.href));
+        const others = w.links.filter((l) => l !== site);
+        return (
+          <article class="entry" id={w.id} aria-labelledby={`${w.id}-title`}>
+            <div class="side">
+              <span class="meta">{w.data.kind}</span>
+              <span>{w.data.role}</span>
+              {w.data.status && <span class="status">{w.data.status}</span>}
+              {site && <a href={site.href}>{site.label}</a>}
+            </div>
+            <div>
+              <h2 id={`${w.id}-title`}>{w.data.name}</h2>
+              <p>{w.data.description}</p>
+              {others.length > 0 && <div class="links">{others.map((l) => <a href={l.href}>{l.label}</a>)}</div>}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</Base>

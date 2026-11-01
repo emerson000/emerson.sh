@@ -1,34 +1,52 @@
+name: Deploy
+
 on:
-    push:
-        branches:
-        - main
-        - develop
+  push:
+    branches:
+      - main
+      - develop
+
+# CMS saves can land seconds apart; let the newest commit win.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
-    deploy:
-      runs-on: ubuntu-latest
-      name: Deploy
-      steps:
-        - uses: actions/checkout@v4
-        - name: Setup Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: '20'
-        - name: Cache dependencies
-          uses: actions/cache@v4
-          with:
-            path: |
-              ~/.npm
-              ${{ github.workspace }}/.next/cache
-            key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
-            restore-keys: |
-              ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-        - name: Install dependencies
-          run: npm install
-        - name: Build
-          run: npm run build
-        - name: Deploy
-          uses: cloudflare/wrangler-action@v3
-          with:
-            apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-            accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            command: pages deploy ./out --project-name=emerson-sh --branch=${{ github.ref_name }}
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build and deploy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Check types and content
+        run: npx astro check
+      # `npm run build` first runs scripts/check-no-drafts.mjs, which fails the
+      # job if a draft or review notes were committed to this public repo.
+      - name: Build
+        run: npm run build
+        env:
+          # Analytics only on the production branch, so previews don't count.
+          PUBLIC_CF_BEACON_TOKEN: ${{ github.ref_name == 'main' && vars.PUBLIC_CF_BEACON_TOKEN || '' }}
+      - name: Previews - no indexing, no CMS
+        if: github.ref_name != 'main'
+        # The CMS is only served from production, behind Cloudflare Access.
+        run: |
+          rm -rf dist/admin
+          printf '\n/*\n  X-Robots-Tag: noindex\n' >> dist/_headers
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.156.0'
+          command: pages deploy ./dist --project-name=emerson-sh --branch=${{ github.ref_name }}

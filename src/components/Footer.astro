@@ -1,0 +1,16 @@
+---
+import { SITE } from "../lib/site";
+const year = new Date().getFullYear();
+---
+<footer class="site-foot">
+  <div class="wrap">
+    <span class="muted">© {year} {SITE.name}</span>
+    <ul>
+      <li><a href="/rss.xml">RSS</a></li>
+      <li><a href="/uses/">Uses</a></li>
+      <li><a href="/tools/">Tools</a></li>
+      <li><a href="/contact/">Contact</a></li>
+      <li><a href="/contact/#pgp">PGP key</a></li>
+    </ul>
+  </div>
+</footer>

@@ -1,0 +1,40 @@
+---
+// Feature articles (`layout: feature`, written in .mdx). This is the shell:
+// a wide display header and a body grid whose children sit in the 68ch reading
+// column by default. Give an element class="wide" to span the page width, or
+// class="full-bleed" to span the viewport. Interactive pieces live in
+// src/components/feature/ and are imported by the .mdx file.
+import Base from "./Base.astro";
+import PrevNext from "../components/PrevNext.astro";
+import { PILLARS, SITE, fmtDate, isoDate, isDraft, readingMinutes, slugOf, type Post } from "../lib/site";
+import { articleJsonLd } from "../lib/article";
+
+interface Props { post: Post; older?: Post; newer?: Post }
+const { post, older, newer } = Astro.props;
+const draft = isDraft(post);
+const { title, description, date, updated, pillar } = post.data;
+const minutes = readingMinutes(post.body);
+---
+<Base title={title} description={description} image={`/og/${slugOf(post)}.png`} type="article" jsonLd={[articleJsonLd(post)]} published={date} modified={updated} noindex={draft}>
+  <article class="feature">
+    <div class="wrap">
+      <header class="feat-head">
+        <p class="meta kicker">Feature · {PILLARS[pillar]}</p>
+        <h1>{title}{draft && <> <span class="draft-badge">Draft</span></>}</h1>
+        <p class="lede">{description}</p>
+        <p class="meta">
+          {SITE.name} · <time datetime={isoDate(date)}>{fmtDate(date)}</time>
+          {updated && <> · Updated <time datetime={isoDate(updated)}>{fmtDate(updated)}</time></>} · {minutes} min
+        </p>
+      </header>
+    </div>
+    <div class="feat-body prose" id="article-body">
+      <slot />
+      <PrevNext older={older} newer={newer} />
+    </div>
+  </article>
+</Base>
+
+<script>
+  import "../scripts/checklists";
+</script>

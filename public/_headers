@@ -1,0 +1,23 @@
+# Cloudflare Pages response headers.
+# The site runs only first-party scripts and the optional Cloudflare Web Analytics beacon.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  X-Frame-Options: DENY
+
+# Sveltia CMS loads from unpkg (fonts from jsDelivr) and talks to the GitHub API, so /admin gets its own, looser policy.
+/admin/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://unpkg.com https://cdn.jsdelivr.net; manifest-src 'self' blob:; img-src 'self' data: blob: https://avatars.githubusercontent.com https://raw.githubusercontent.com https://*.githubusercontent.com; media-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' blob: data: https://unpkg.com https://cdn.jsdelivr.net https://api.github.com https://www.githubstatus.com https://raw.githubusercontent.com https://*.githubusercontent.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'
+  X-Robots-Tag: noindex
+  Cache-Control: no-store
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/og/*
+  Cache-Control: public, max-age=86400

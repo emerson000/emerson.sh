@@ -1,0 +1,73 @@
+---
+// Feed density, first pass against the shipped version, drawn to scale from
+// measurements of the feed area in a 1440 × 1000 window. Two radio buttons switch
+// the drawing; no script, so it works without JavaScript.
+import Mock from "./Mock.astro";
+
+interface Props { id?: string }
+const { id = "kd" } = Astro.props;
+// Measured in the feed area (1440 × 1000 window): header, row and reading-pane heights.
+// Header + reading pane = 871 in both versions, so the drawing is 871 units tall.
+const rows = Array.from({ length: 12 }, (_, i) => i);
+---
+<Mock crumb="Feed" sub="density" label="Feed density comparison" class="kd">
+  <div class="kd-wrap">
+    <fieldset class="km-seg kd-seg">
+      <legend>Version</legend>
+      <label><input type="radio" name={`${id}-v`} value="first" />First pass</label>
+      <label><input type="radio" name={`${id}-v`} value="shipped" checked />Shipped</label>
+    </fieldset>
+    <div class="kd-grid">
+      <div class="kd-draw" aria-hidden="true">
+        <div class="kd-header"><span>Header</span></div>
+        <div class="kd-list">
+          {rows.map(() => <div class="kd-row"><i></i><i></i></div>)}
+        </div>
+        <div class="kd-read"><span>Reading pane</span><i></i><i></i><i></i><i></i></div>
+      </div>
+      <dl class="kd-facts">
+        <div><dt>Header</dt><dd><span class="kd-a">257 px</span><span class="kd-b">112 px</span></dd></div>
+        <div><dt>Feed row</dt><dd><span class="kd-a">138 px</span><span class="kd-b">87 px</span></dd></div>
+        <div><dt>Reading pane</dt><dd><span class="kd-a">614 px</span><span class="kd-b">759 px</span></dd></div>
+      </dl>
+    </div>
+  </div>
+  <Fragment slot="caption"><strong>Feed density, schematic.</strong> Heights are to scale, from measurements in a 1440 × 1000 window. Switch between the first pass and the shipped version.</Fragment>
+</Mock>
+
+<style>
+  .kd-wrap { padding: var(--s4); }
+  .kd-seg { margin-bottom: var(--s4); }
+  .kd-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(10rem, 1fr); gap: var(--s5); align-items: start; }
+  .kd-wrap { --h: 112; --r: 87; }
+  .kd-wrap:has(input[value="first"]:checked) { --h: 257; --r: 138; }
+
+  .kd-draw { position: relative; aspect-ratio: 1440 / 871; border: 1px solid var(--muted); background: var(--bg); overflow: hidden; }
+  .kd-header { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--h) / 871 * 100%); background: var(--surface); border-bottom: 1px solid var(--muted); padding: var(--s2); }
+  .kd-header span, .kd-read span { font: 500 12px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .kd-list { position: absolute; left: 0; width: 50%; bottom: 0; top: calc(var(--h) / 871 * 100%); overflow: hidden; border-right: 1px solid var(--muted); }
+  .kd-row { height: calc(var(--r) / (871 - var(--h)) * 100%); border-bottom: 1px solid var(--line-strong); padding: 3% 6%; display: flex; flex-direction: column; justify-content: center; gap: 6%; }
+  .kd-row i { display: block; height: 6px; background: var(--muted); width: 70%; }
+  .kd-row i + i { width: 90%; background: var(--line-strong); }
+  .kd-row:first-child { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+  .kd-read { position: absolute; left: 50%; right: 0; bottom: 0; top: calc(var(--h) / 871 * 100%); padding: var(--s3); display: flex; flex-direction: column; gap: 8px; }
+  .kd-read i { display: block; height: 6px; background: var(--line-strong); width: 92%; }
+  .kd-read i:nth-child(2) { margin-top: var(--s2); height: 10px; width: 70%; background: var(--muted); }
+
+  .kd-facts { display: block; margin: 0; border-top: 1px solid var(--text); }
+  .kd-facts dt, .kd-facts dd { padding: 0; border: 0; }
+  .kd-facts div { display: flex; justify-content: space-between; gap: var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+  .kd-facts dt { color: var(--muted); }
+  .kd-facts dd { margin: 0; font: 500 15px/1.4 var(--mono); }
+  .kd-a { display: none; }
+  .kd-wrap:has(input[value="first"]:checked) .kd-a { display: inline; }
+  .kd-wrap:has(input[value="first"]:checked) .kd-b { display: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .kd-header, .kd-list, .kd-read, .kd-row { transition: height var(--base) var(--ease), top var(--base) var(--ease); }
+  }
+  @container (max-width: 560px) {
+    .kd-grid { grid-template-columns: minmax(0, 1fr); }
+    .kd-row i { height: 4px; }
+  }
+</style>

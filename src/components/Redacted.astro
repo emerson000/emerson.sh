@@ -1,0 +1,16 @@
+---
+/**
+ * An inline redaction bar. Use it in place of a name or detail that must not be published.
+ * The redacted text is never in the page: screen readers hear the label instead.
+ *   <Redacted />            medium bar
+ *   <Redacted size="s" />   short bar (about 4 characters)
+ *   <Redacted size="l" />   long bar (about 14 characters)
+ * In plain Markdown, use: <span class="redacted" role="img" aria-label="redacted"></span>
+ */
+interface Props {
+  size?: "s" | "m" | "l";
+  label?: string;
+}
+const { size = "m", label = "redacted" } = Astro.props;
+---
+<span class={`redacted redacted--${size}`} role="img" aria-label={label}></span>

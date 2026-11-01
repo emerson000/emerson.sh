@@ -1,0 +1,29 @@
+# Work page entries, in display order.
+# links: internal /writing/<slug>/ links are hidden automatically while that article is a draft.
+- name: Covert Signals
+  kind: Project
+  role: Founder
+  summary: Independent security intelligence, privacy and research.
+  description: "My independent project for security intelligence, privacy and research. It's where I study how information is collected, exposed and protected, and where most of the tools and writing on this site begin."
+  links:
+    - label: covertsignals.com
+      href: https://covertsignals.com
+    - label: Related writing
+      href: /writing/
+- name: Kayori
+  kind: Product
+  role: Founder
+  status: In development
+  summary: A self-hosted OSINT workstation. In development.
+  description: An open-source-intelligence workstation that runs on your own hardware. One feed, cases, link graphs and language-model refiners in a single self-hosted install. Written in Rust.
+  links:
+    - label: The interface refresh
+      href: /writing/kayori-ui-refresh/
+    - label: Building Kayori
+      href: /writing/building-kayori/
+- name: CommCrate
+  kind: Open hardware
+  role: CERN-OHL
+  summary: Open-hardware emergency communications case.
+  description: A 3D-printed, modular case for emergency communications gear. Radios, power and networking drop into swappable bays, so the kit can be reconfigured for the job in minutes.
+  links: []

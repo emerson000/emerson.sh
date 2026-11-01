@@ -1,0 +1,23 @@
+---
+import { render } from "astro:content";
+import Article from "../../layouts/Article.astro";
+import Feature from "../../layouts/Feature.astro";
+import { getPosts, slugOf } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  // Newest first, so the next item in the array is the older post.
+  return posts.map((post, i) => ({
+    params: { slug: slugOf(post) },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+---
+{post.data.layout === "feature" ? (
+  <Feature post={post} older={older} newer={newer}><Content /></Feature>
+) : (
+  <Article post={post} headings={headings} older={older} newer={newer}><Content /></Article>
+)}

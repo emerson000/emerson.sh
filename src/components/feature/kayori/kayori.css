@@ -1,0 +1,74 @@
+/* Shared styles for the Kayori mock figures (src/components/feature/kayori/).
+   The mocks wear emerson.sh's tokens (src/styles/global.css), not Kayori's brand,
+   so they read as illustrations in this article and follow both themes.
+   Everything is prefixed `km-` to stay out of the site's way. */
+
+.km {
+  margin: var(--s7) 0;
+  container-type: inline-size;
+}
+.km-win {
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  font: 14px/1.5 var(--body);
+  color: var(--text);
+  overflow: hidden;
+}
+.km-bar {
+  display: flex; align-items: baseline; gap: var(--s3);
+  padding: var(--s2) var(--s4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.km-crumb { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.km-crumb span { color: var(--muted); font-weight: 400; }
+.km-flag { margin-left: auto; flex: none; font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--muted); padding: 0 var(--s1); }
+
+/* Case tab strip: Overview | Collection | Processing | Analysis | Activity. A picture, hidden from assistive technology. */
+.km-tabs { display: flex; align-items: flex-end; gap: var(--s4); padding: var(--s2) var(--s4) 0; border-bottom: 1px solid var(--line); overflow: hidden; white-space: nowrap; }
+.km-tabgroup { display: flex; flex-direction: column; gap: 2px; }
+.km-tabgroup-label { font: 500 12px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.km-tabgroup-tabs { display: flex; gap: var(--s3); }
+.km-tab { padding: var(--s1) 0 var(--s2); color: var(--muted); border-bottom: 2px solid transparent; }
+.km-tab.is-on { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+@container (max-width: 640px) {
+  .km-tabgroup:not(.has-on) { display: none; }
+}
+
+.km-cap { margin-top: var(--s3); font-size: 15px; color: var(--muted); }
+.km-cap strong { color: var(--text); font-weight: 600; }
+
+/* Small parts used across the mocks. */
+.km-label { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 var(--s1); }
+.km-mono { font: 13px/1.4 var(--mono); }
+.km-btn {
+  font: 500 14px/1.2 var(--body); color: var(--text); background: var(--bg);
+  border: 1px solid var(--muted); border-radius: 0; padding: 6px var(--s3); min-height: 32px; cursor: pointer;
+}
+.km-btn:hover:not(:disabled) { border-color: var(--text); background: var(--surface); }
+.km-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-hover); background: var(--accent-soft); }
+.km-btn:disabled { cursor: default; }
+.km-btn:focus-visible, .km button:focus-visible, .km label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.km-chip { display: inline-block; font: 500 12px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line-strong); padding: 0 var(--s1); }
+.km-state { display: inline-block; font: 500 12px/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.km-state[data-v="review"] { color: var(--warn-text); background: var(--warn-bg); padding: 0 var(--s1); }
+.km-state[data-v="flagged"] { color: var(--accent-hover); background: var(--accent-soft); padding: 0 var(--s1); }
+.km-state[data-v="linked"] { color: var(--text); border: 1px solid var(--text); padding: 0 var(--s1); }
+.km-reading { font: 16px/1.65 var(--display); }
+
+/* Segmented control made of radio inputs: works without JavaScript. */
+.km-seg { display: inline-flex; border: 1px solid var(--muted); margin: 0; padding: 0; min-width: 0; }
+.km-seg legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.km-seg label { position: relative; display: block; padding: 5px var(--s3); font: 500 14px/1.2 var(--body); color: var(--muted); cursor: pointer; }
+.km-seg label + label { border-left: 1px solid var(--muted); }
+.km-seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.km-seg label:has(input:checked) { color: var(--bg); background: var(--text); }
+.km-seg label:hover:not(:has(input:checked)) { color: var(--text); background: var(--surface); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .km-btn, .km-seg label { transition: background-color var(--fast) var(--ease), border-color var(--fast) var(--ease), color var(--fast) var(--ease); }
+}
+@media (forced-colors: active) {
+  .km-btn[aria-pressed="true"], .km-seg label:has(input:checked) { outline: 2px solid Highlight; }
+}

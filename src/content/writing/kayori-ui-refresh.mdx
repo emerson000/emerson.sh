@@ -1,0 +1,181 @@
+---
+title: "A day in Kayori: the interface refresh"
+description: "A year after I restarted Kayori in Rust, it has a quieter interface. A walk through an analyst's day, from the feed to a pinned finding."
+date: 2026-10-11
+pillar: building
+tags: [kayori, osint, ui-design, accessibility]
+layout: feature
+---
+
+import Scrolly from "../../components/feature/Scrolly.astro";
+import Step from "../../components/feature/Step.astro";
+import DensityCompare from "../../components/feature/kayori/DensityCompare.astro";
+import FeedTriage from "../../components/feature/kayori/FeedTriage.astro";
+import CaseGraph from "../../components/feature/kayori/CaseGraph.astro";
+import NotesStudio from "../../components/feature/kayori/NotesStudio.astro";
+import Findings from "../../components/feature/kayori/Findings.astro";
+
+<p class="dropcap">Last October I wrote that Kayori should be an analyst's notebook, not a dashboard. At the time it had a command line, a message bus and a plan. It had no database and no interface. A year later it has both, and on 3 and 4 October I shipped a refresh of the whole interface.</p>
+
+Kayori is my self-hosted workstation for open-source intelligence (OSINT): information anyone can legally collect from public sources. This post walks through one working day in the refreshed interface, in the order an analyst meets it: the feed, triage, the case, the graph, and the findings at the end. Along the way I explain why each screen looks the way it does.
+
+Every figure is a mock built for this page. It runs in your browser, and the case in it is invented: a fake product recall that tries to collect card numbers. The names use reserved `.example` domains and documentation addresses. Nothing in the figures is real case data.
+
+## What changed in a year
+
+The short version: Kayori is now one self-hosted install.
+
+In 2025 I planned a peer-to-peer mesh, so that separate Kayori installs could share intelligence with each other. I dropped that plan. Kayori is now a single install that one analyst, or a small team, runs on hardware they control. It is the same lesson as the first prototype taught me: I was designing for a scale I did not need yet.
+
+The rest grew from the foundation I described last year:
+
+- **One Rust codebase.** A worker does the collecting and processing. A web server renders the pages and sends live updates to the browser. Data lives in SQLite, a database that is a single file on disk.
+- **Collectors** pull in news feeds, social posts, web pages and domain records on a schedule.
+- **Watchlists** mark the items that match a case's terms.
+- **Refiners** are what I called "processors" last year: instructions for a language model that reads an item linked to a case and writes back a note and structured fields.
+- **The case graph** holds the people, organizations, domains, addresses and documents in a case, and the relationships between them.
+
+By September all of that worked. It was also hard to look at for long. The interface had grown one feature at a time, on a dark console theme. The dashboard opened with a large header and five metrics, each in its own accent colour. The feed packed kind, platform, two sort fields, search and a result count into one crowded row. Source names showed as internal identifiers in capitals. Nothing was broken, but everything asked for attention at once.
+
+## The rules I set first
+
+Before I changed a screen, I wrote down a short set of rules. Each one answers a problem from that list.
+
+- **One accent colour, and it means "this one".** The selected row, the current tab, the selected node. It is never decoration. Status always comes with a word, so colour never carries meaning alone.
+- **Light and dark are equal.** Same layout, same roles, two mappings. The theme follows the system until you choose otherwise.
+- **Two typefaces with two jobs.** A plain sans serif for controls. A reading serif at 16 pixels for anything a person has to read closely: source text and notes.
+- **No text smaller than 12 pixels.** Metadata had crept down to 10.
+- **Flat surfaces.** Thin borders separate things. Only an overlay, such as a dialog, gets a shadow.
+
+I drew two directions. One kept the old cyan accent and saved red, amber and green for status. The other was neutral grey with one red accent. I shipped the second. It was quieter, and on a screen you look at for hours, quiet wins.
+
+The first pass followed the prototype closely, and it was too generous. Rows had room to breathe and the header had a description line, but at a normal window size I could see only a few items at a time. Triage is a scanning job. So I measured, cut the header down, and tightened the rows. Then I measured again.
+
+<DensityCompare />
+
+The header lost more than half its height. The rows got shorter, so about twice as many fit on the screen, and the reading pane gained 145 pixels. Nothing was removed to get there. The filters now share one line, and the type and state badges sit beside the source.
+
+## 08:30 · The feed
+
+The day starts in the feed. It is everything collected for all cases, newest first, and it updates while you watch.
+
+The refresh split the feed into two panes. On the left is the reporting list: source, time, kind, state, a headline and one line of summary. On the right is the reading pane: the full text in the reading face, the watchlist that matched, the triage actions and the cases the item is linked to. You read in place. You do not open a page and come back.
+
+Above the list are three review scopes: All, Unread and Needs review, each with a count. Most mornings I go straight to Needs review.
+
+<FeedTriage />
+
+On a phone the two panes become two views. Selecting an item opens it, and Back returns you to the same row in the list, with the keyboard focus on it. That last detail matters. Losing your place in a list of two hundred items is the fastest way to stop triaging.
+
+## Triage is a decision
+
+The four triage states are Unread, Needs review, Flagged and Linked. They are not a read receipt. Each one records a decision about the item:
+
+- **Unread:** nobody has looked yet.
+- **Needs review:** someone looked and is not sure. Come back to it.
+- **Flagged:** this matters. Act on it today.
+- **Linked:** this belongs to a case, and now lives there too.
+
+One rule from the design notes stays with me: a reviewed item is not a verified source. Triage says what to do next. It says nothing about whether the item is true. That judgment belongs in the case, in a note, with the evidence beside it.
+
+## 10:00 · The case
+
+A case holds one question. Here the question is: who is sending fake recall refund emails in a camping brand's name, and where does the money go?
+
+A case has ten tabs. Earlier this year I grouped them into the three stages from my first brief, and the refresh kept that grouping and gave it a quieter style:
+
+- **Collection:** Collectors, Watchlists and Feed. What comes in.
+- **Processing:** Processors (where refiners live) and Alerts. What reads it for you.
+- **Analysis:** Entities, Graph and Notes. What you make of it.
+
+Overview sits before the groups and Activity after them. The labels are small, but they answer the question a new analyst always asks, "where do I look for X?", before they ask it.
+
+The graph is where the work of a case becomes visible. Scroll through the steps below, and select any node in the graph to see what it touches.
+
+<Scrolly state="case subject dns whois focus found" progress={1} stepsLabel="Building the case graph">
+  <CaseGraph slot="graphic" />
+
+  <Step label="Feed → Case" title="Link the items" state="case" progress={0.15} describe="an article and a post appear, and the organization they mention.">
+
+  From the feed I link the article and the social post to the case. A refiner reads each one as it is linked and writes a short note. The organization the article mentions, Pellwood Outdoor, joins the graph too.
+
+  </Step>
+
+  <Step label="Case · Graph" title="Name the subject" state="case subject" progress={0.3} describe="the lookalike domain appears in the middle, joined to both items by Mentions.">
+
+  The post names the sender's domain, pellwood-recall.example. I add it to the case as a subject. Both items already mention it, so it arrives joined to them.
+
+  </Step>
+
+  <Step label="Domain analysis" title="Ask the domain what it knows" state="case subject dns" progress={0.5} describe="an IP address, a name server and a mail host join the domain.">
+
+  A DNS lookup adds the address the domain resolves to, its name server and its mail host. Each one is its own node, joined by a relationship that says what it is: Resolves To, NS Record For, MX Record For.
+
+  </Step>
+
+  <Step label="Domain analysis" title="Registration and certificate" state="case subject dns whois" progress={0.7} describe="a WHOIS contact, a network, a certificate, a second domain and a web page join.">
+
+  WHOIS adds the contact address on the registration. The address's network is added too. The TLS certificate is the surprise: it names a second domain nobody had asked about, pellwood-refunds.example. That domain hosts the refund form from the feed.
+
+  </Step>
+
+  <Step label="Inspector" title="Select what matters" state="case subject dns whois focus" progress={0.85} describe="the certificate is selected; its two domains stay solid and the rest step back.">
+
+  I select the certificate. The inspector lists its two relationships, and the rest of the graph steps back. One certificate for two lookalike domains: whoever sends the emails also runs the page that takes the card numbers.
+
+  </Step>
+
+  <Step label="Notes" title="Write it down" state="case subject dns whois focus found" progress={1} describe="the certificate carries a Finding marker.">
+
+  A graph shows a connection. It does not explain it. So the last step is a note: what I found, the evidence, how sure I am, and what it means. I pin it to the case Overview as a finding.
+
+  </Step>
+</Scrolly>
+
+Two smaller changes made the graph easier to use. The graph code now lives in its own package with a clear boundary to the rest of the app, which made it possible to test and restyle it on its own. And the graph's toolbar, panels and canvas now follow the light and dark themes like every other screen.
+
+## 13:00 · Refiners do the first read
+
+I did not redesign refiners in this round, but they shape the day, so they belong in the walkthrough.
+
+A refiner is a short set of instructions for a language model, written for one case. When an item is linked, the refiner reads it and writes back an investigation note and structured fields, such as relevance or topic. Every value records where it came from: an analyst, a refiner or the system. A model's reading is never mistaken for mine, and when I correct a value, the record says so.
+
+This is the rule from last year, unchanged: language models are processors, not oracles. They do the first read so I can do the second one.
+
+## 15:00 · Notes and findings
+
+The notes were the part of the old interface I liked least, and the part I rebuilt most.
+
+Pinned findings used to sit in a narrow column on the right of the case Overview. That column gave about 35 characters per line. Comfortable reading needs 45 to 75. No amount of styling fixes that, so the findings moved to a full-width band under the case's summary figures.
+
+Each finding is a tile. The tiles are not all the same size: a note over about 150 words gets a double-width tile that lists its sections. Critical findings come first, with the word "Critical" in red and a red edge. Opening a tile shows the whole note in a reader sheet at a comfortable line length, with Previous and Next to move through the other pinned notes.
+
+<Findings />
+
+Writing happens in the Notes tab, which I now call the studio. It has three parts: the list of notes, the open note, and a details pane with an outline. A note has a title and a kind: note, finding or report. It can be marked critical and pinned to the Overview.
+
+New notes start from a template. A finding asks four questions: What we found, Evidence, Confidence, and So what. A report starts with the bottom line and then gives key judgments, what changed, gaps and outlook. The templates are short on purpose. They are a reminder of the questions a reader will ask, not a form to fill in.
+
+<NotesStudio />
+
+Three decisions shaped the studio:
+
+1. **Write in the reading face.** The source pane uses the same serif and size as the finished note. Analysts write prose, not code, and a monospace editor makes a report feel like a configuration file.
+2. **One renderer.** The live preview runs the same Markdown renderer that displays the saved note, so the preview cannot drift from what readers see.
+3. **Save without asking.** A note saves itself about a second after you stop typing, and the status bar says "Saving…" and then "Saved". If a save fails, the text stays in the editor, the bar says "Not saved", and a Retry button appears. Losing an analyst's text is the one failure I will not accept.
+
+## How I checked it
+
+Each part of the refresh went through the same steps: a written design system, a clickable prototype with invented data, and then the change in the real app. I checked every screen at three widths, 1440, 1024 and 390 pixels, in both themes. The checks covered text contrast, keyboard focus and horizontal overflow. Automated browser tests cover the new behaviour, such as Back returning focus to the right row and a failed save keeping its text.
+
+The figures on this page follow the same rules. Each one works with a keyboard and a screen reader. Without JavaScript, each one shows its finished state. With reduced motion turned on, nothing animates.
+
+## What I learned
+
+1. **Write the rules before the screens.** Five short rules settled arguments that would otherwise have come back on every screen.
+2. **Measure density, do not guess it.** My first pass looked calm in a screenshot and was slow to use. The numbers showed why.
+3. **Put the reading where the reading is.** The findings were not badly styled. They were in a column too narrow to read.
+4. **Keep the analyst's judgment separate.** Triage states, refiner output and findings each say who decided what. That separation is the point of the tool.
+5. **Cut the plan that serves a future you do not have.** Dropping the mesh made room for everything on this page.
+
+A dashboard tells you that something happened. A notebook helps you decide what it means and shows how you got there. After a year, Kayori finally looks like the second one.

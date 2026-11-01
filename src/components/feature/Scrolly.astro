@@ -1,0 +1,75 @@
+---
+// Scrollytelling container for feature articles. A sticky graphic (the
+// "graphic" slot) sits beside a list of <Step>s (the default slot). As each
+// step crosses a line in the viewport, the script copies the step's
+// `data-state` and progress onto this root element. Graphics react with CSS
+// only, for example:
+//   :global([data-scrolly][data-state~="wall"]) .wall { opacity: 1; }
+//   .bar { transform: scaleX(var(--scrolly-progress)); }
+// Any element inside with data-scrolly-text="label" gets the active step's
+// label; render it with the final label so it reads without JavaScript.
+//
+// Without JavaScript the steps read as a plain list and the graphic shows the
+// `state` and `progress` given here, so pass the final step's values.
+interface Props {
+  /** Space-separated state tokens shown without JavaScript (use the last step's). */
+  state?: string;
+  /** 0 to 1, shown without JavaScript (use the last step's). */
+  progress?: number;
+  /** Accessible name for the list of steps. */
+  stepsLabel?: string;
+  class?: string;
+}
+const { state = "", progress = 1, stepsLabel = "Timeline", class: cls } = Astro.props;
+const p = Math.min(1, Math.max(0, progress));
+---
+<div class:list={["scrolly wide", cls]} data-scrolly data-state={state} style={`--scrolly-progress: ${p}`}>
+  <div class="scrolly-graphic">
+    <slot name="graphic" />
+  </div>
+  <ol class="scrolly-steps" aria-label={stepsLabel}>
+    <slot />
+  </ol>
+</div>
+
+<script>
+  import { initScrolly } from "./scrolly";
+  initScrolly();
+</script>
+
+<style is:global>
+  .scrolly { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--s8); margin: var(--s7) 0; align-items: start; }
+  .scrolly-graphic { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+  .scrolly-graphic > * { width: 100%; }
+  .scrolly .scrolly-steps { list-style: none; margin: 0; padding: 0; }
+  .scrolly .scrolly-step { margin: 0; padding: var(--s6) 0; }
+  .scrolly .scrolly-step:first-child { padding-top: 0; }
+  .scrolly .scrolly-card { border-top: 2px solid var(--line-strong); padding-top: var(--s4); background: var(--bg); }
+  .scrolly .scrolly-clock { font: 500 22px/1.2 var(--mono); color: var(--muted); margin: 0 0 var(--s3); }
+  .scrolly .scrolly-card h3 { font: 600 22px/1.25 var(--display); margin: 0 0 var(--s3); }
+  .scrolly .scrolly-card p { font-size: 16px; margin: 0 0 var(--s3); }
+  .scrolly .scrolly-card > :last-child { margin-bottom: 0; }
+
+  /* With JavaScript: one step at a time, spaced so each gets the screen. */
+  .scrolly.is-live .scrolly-steps { padding: 30vh 0 40vh; }
+  .scrolly.is-live .scrolly-step { min-height: 75vh; display: flex; align-items: center; padding: 0; }
+  .scrolly.is-live .scrolly-step > .scrolly-card { width: 100%; }
+  .scrolly.is-live .scrolly-step[data-active] .scrolly-card { border-top-color: var(--accent); }
+  .scrolly.is-live .scrolly-step[data-active] .scrolly-clock { color: var(--accent); }
+  @media (prefers-reduced-motion: no-preference) {
+    .scrolly .scrolly-card, .scrolly .scrolly-clock { transition: border-color var(--base) var(--ease), color var(--base) var(--ease); }
+  }
+
+  /* Narrow screens: the graphic pins to the top and the cards scroll over it. */
+  @media (max-width: 860px) {
+    .scrolly { display: block; position: relative; }
+    .scrolly-graphic { position: static; height: auto; margin-bottom: var(--s6); }
+    .scrolly.is-live .scrolly-graphic { position: sticky; top: 0; height: 46vh; z-index: 1; padding-bottom: var(--s2); background: var(--bg); border-bottom: 1px solid var(--line); margin-bottom: 0; }
+    .scrolly.is-live .scrolly-steps { position: relative; z-index: 2; padding: 8vh 0 0; }
+    .scrolly.is-live .scrolly-step { min-height: 0; display: block; padding-bottom: 52vh; }
+    .scrolly.is-live .scrolly-step:last-child { padding-bottom: 20vh; }
+    .scrolly.is-live .scrolly-card { padding: var(--s4); border: 1px solid var(--line); border-top-width: 2px; }
+    .scrolly .scrolly-clock { font-size: 18px; }
+    .scrolly .scrolly-card h3 { font-size: 20px; }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostRow from "../../components/PostRow.astro";
+import { PILLARS, getPosts, listDate } from "../../lib/site";
+
+const posts = await getPosts();
+const years = [...new Set(posts.map((p) => listDate(p).getUTCFullYear()))];
+const pillars = (Object.keys(PILLARS) as (keyof typeof PILLARS)[]).filter((k) => posts.some((p) => p.data.pillar === k));
+---
+<Base title="Writing" description="Security, intelligence work, and building with AI agents. Long-form, written from things I've actually run.">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Writing</h1>
+      <p class="lede">Security, intelligence work, and building with AI agents. Mostly long-form, written from things I've actually run. About one a month.</p>
+    </div>
+    <!-- Without JavaScript the filters stay hidden and the full list shows. -->
+    <ul class="filters" aria-label="Filter by topic" data-filters hidden>
+      <li><button type="button" data-f="all" aria-pressed="true">All</button></li>
+      {pillars.map((k) => <li><button type="button" data-f={k} aria-pressed="false">{PILLARS[k]}</button></li>)}
+    </ul>
+    <p class="sr-only" role="status" data-filter-status></p>
+    <div id="writing-list">
+      {years.map((y) => (
+        <section class="year-group" aria-labelledby={`y${y}`}>
+          <h2 class="year" id={`y${y}`}>{y}</h2>
+          <ol class="rows">
+            {posts.filter((p) => listDate(p).getUTCFullYear() === y).map((post) => <PostRow post={post} />)}
+          </ol>
+        </section>
+      ))}
+      {posts.length === 0 && <p class="empty">Nothing published yet.</p>}
+      <p class="empty" data-empty hidden>Nothing in this topic yet. <button type="button" class="btn secondary" data-f="all">Show all writing</button></p>
+    </div>
+    <p class="small muted" style="margin-top: var(--s5)">Follow along with the <a href="/rss.xml">RSS feed</a>.</p>
+  </div>
+</Base>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-filters]");
+  const rows = [...document.querySelectorAll<HTMLElement>("#writing-list .row")];
+  const groups = [...document.querySelectorAll<HTMLElement>("#writing-list .year-group")];
+  const empty = document.querySelector<HTMLElement>("[data-empty]");
+  const status = document.querySelector<HTMLElement>("[data-filter-status]");
+  const keys = new Set([...document.querySelectorAll<HTMLElement>("[data-filters] [data-f]")].map((b) => b.dataset.f!));
+
+  function apply(f: string, push: boolean) {
+    if (!keys.has(f)) f = "all";
+    document.querySelectorAll<HTMLElement>("[data-filters] [data-f]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
+    let shown = 0;
+    rows.forEach((r) => {
+      const on = f === "all" || r.dataset.pillar === f;
+      r.hidden = !on;
+      if (on) shown++;
+    });
+    groups.forEach((g) => (g.hidden = !g.querySelector(".row:not([hidden])")));
+    if (empty) empty.hidden = shown > 0 || rows.length === 0;
+    if (status && push) status.textContent = `${shown} ${shown === 1 ? "article" : "articles"}`;
+    if (push) {
+      const url = new URL(location.href);
+      if (f === "all") url.searchParams.delete("topic");
+      else url.searchParams.set("topic", f);
+      history.replaceState(null, "", url);
+    }
+  }
+
+  if (bar) {
+    bar.hidden = false;
+    document.addEventListener("click", (e) => {
+      const b = (e.target as Element).closest<HTMLElement>("[data-f]");
+      if (b) apply(b.dataset.f!, true);
+    });
+    apply(new URLSearchParams(location.search).get("topic") ?? "all", false);
+  }
+</script>

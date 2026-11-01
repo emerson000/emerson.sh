@@ -1,0 +1,58 @@
+---
+import { SITE } from "../lib/site";
+
+const path = Astro.url.pathname;
+const links = [
+  { href: "/writing/", label: "Writing" },
+  { href: "/work/", label: "Work" },
+  { href: "/about/", label: "About" },
+];
+// "page" for the page itself, "true" for pages inside the section (an article under Writing).
+const current = (href: string) => (path === href ? "page" : path.startsWith(href) ? "true" : undefined);
+---
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-current={path === "/" ? "page" : undefined}>{SITE.name}</a>
+    <nav class="nav" aria-label="Main">
+      <ul>
+        {links.map((l) => <li><a href={l.href} aria-current={current(l.href)}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="theme-switch" role="group" aria-label="Colour theme" hidden>
+      <button type="button" data-theme-choice="auto" aria-pressed="true" aria-label="System theme" title="System theme">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="1.5" y="2.5" width="13" height="8.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14h5M8 11v3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <button type="button" data-theme-choice="light" aria-pressed="false" aria-label="Light theme" title="Light theme">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  // System (follow the OS), Light or Dark. The choice is kept in localStorage;
+  // public/theme.js applies it in <head> before the first paint. Without JS the
+  // group stays hidden and the site follows the system setting.
+  type Theme = "auto" | "light" | "dark";
+  const root = document.documentElement;
+  const group = document.querySelector<HTMLElement>(".theme-switch");
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-theme-choice]")];
+  function apply(t: Theme, save: boolean) {
+    if (t === "auto") delete root.dataset.theme;
+    else root.dataset.theme = t;
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeChoice === t)));
+    if (!save) return;
+    try {
+      if (t === "auto") localStorage.removeItem("es-theme");
+      else localStorage.setItem("es-theme", t);
+    } catch {}
+  }
+  if (group) {
+    group.hidden = false;
+    apply((root.dataset.theme as Theme) || "auto", false);
+    buttons.forEach((b) => b.addEventListener("click", () => apply(b.dataset.themeChoice as Theme, true)));
+  }
+</script>

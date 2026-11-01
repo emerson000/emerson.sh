@@ -1,0 +1,17 @@
+---
+import { PILLARS, fmtDate, isDraft, isoDate, listDate, postUrl, type Post } from "../lib/site";
+interface Props { post: Post }
+const { post } = Astro.props;
+const d = listDate(post);
+const feature = post.data.layout === "feature";
+---
+<li class="row" data-pillar={post.data.pillar}>
+  <span class="when">
+    <time datetime={isoDate(d)}>{fmtDate(d).padStart(11, "0")}</time>
+    <span class={feature ? "tag feature" : "tag"}>{feature ? "Feature · " : ""}{PILLARS[post.data.pillar]}</span>
+  </span>
+  <span>
+    <a class="title" href={postUrl(post)}>{post.data.title}</a>{isDraft(post) && <span class="draft-badge">Draft</span>}
+    <span class="sub">{post.data.description}</span>
+  </span>
+</li>

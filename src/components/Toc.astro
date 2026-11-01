@@ -1,0 +1,24 @@
+---
+// Built at build time from the headings render() returns. Only H2s are listed;
+// their numbers match the CSS counter on .prose h2.
+import type { MarkdownHeading } from "astro";
+interface Props { headings: MarkdownHeading[]; variant: "aside" | "details" }
+const { headings, variant } = Astro.props;
+const items = headings.filter((h) => h.depth === 2);
+const pad = (i: number) => String(i + 1).padStart(2, "0");
+---
+{items.length > 0 && (variant === "aside" ? (
+  <aside class="toc" aria-labelledby="toc-title">
+    <span class="meta" id="toc-title">Contents</span>
+    <ol>
+      {items.map((h, i) => <li><span class="num" aria-hidden="true">{pad(i)}</span><a href={`#${h.slug}`} data-toc={h.slug}>{h.text}</a></li>)}
+    </ol>
+  </aside>
+) : (
+  <details class="toc-mobile">
+    <summary>Contents</summary>
+    <ol>
+      {items.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+    </ol>
+  </details>
+))}

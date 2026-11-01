@@ -1,0 +1,24 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+const groups = (await getCollection("uses")).sort((a, b) => a.data.order - b.data.order);
+const pad = (i: number) => String(i + 1).padStart(2, "0");
+---
+<Base title="Uses" description="Software I use every week and would recommend.">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Uses</h1>
+      <p class="lede">Software I use every week and would recommend. Updated when something earns its place or loses it.</p>
+    </div>
+    <div class="uses">
+      {groups.map((g, i) => (
+        <section class="uses-group" aria-labelledby={`g-${g.id}`}>
+          <h2 id={`g-${g.id}`}><span class="num" aria-hidden="true">{pad(i)}</span>{g.data.group}</h2>
+          <ul>
+            {g.data.items.map((it) => <li><a href={it.href}>{it.name}</a><span>{it.note}</span></li>)}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</Base>

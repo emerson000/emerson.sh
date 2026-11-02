@@ -92,7 +92,7 @@ Normal articles are plain Markdown (`.md`). Besides the usual Markdown and GitHu
 
 The types are `NOTE`, `TIP`, `IMPORTANT`, `WARNING` and `CAUTION`. Warnings and cautions are tinted amber.
 
-**Checklists.** A task list becomes an interactive checklist with a progress count ("2 of 5 done") and a Reset button. Ticks are saved in the reader's browser. The first line of an item is the setting. Put the reason on the next line, indented, and it shows in grey below:
+**Checklists.** A task list becomes an interactive checklist with a progress count ("2 of 5 done") and a Reset button. Checked items are saved in the reader's browser. The first line of an item is the setting. Put the reason on the next line, indented, and it shows in gray below:
 
 ```markdown
 - [ ] Automatic Updates: `On`
@@ -100,7 +100,7 @@ The types are `NOTE`, `TIP`, `IMPORTANT`, `WARNING` and `CAUTION`. Warnings and 
 - [ ] Stolen Device Protection: `On`
 ```
 
-`- [x]` items render ticked even without JavaScript. Ticks are stored per list, under the heading above the list, and per item, under the text of the setting. If you rename a heading or a setting, readers lose the ticks for it. Without JavaScript the boxes still work; they are not saved.
+`- [x]` items render checked even without JavaScript. Checked states are stored per list, under the heading above the list, and per item, under the text of the setting. If you rename a heading or a setting, readers lose the ticks for it. Without JavaScript the boxes still work; they are not saved.
 
 **Code.** Fenced code blocks with a language name are highlighted at build time with Shiki, in a light and a dark theme.
 

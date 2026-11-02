@@ -8,7 +8,7 @@ tags: ["ios", "iphone", "privacy", "hardening"]
 toc: true
 ---
 
-Most iPhone hardening guides are lists of switches. Lists age badly. Apple renames and moves menus every year, and a setting without its reason is hard to judge when it moves. This version keeps the checklist from the first edition but adds a reason under each item, so you can decide what fits your own risk. Tick items as you go.
+Most iPhone hardening guides are lists of switches. Lists age badly. Apple renames and moves menus every year, and a setting without its reason is hard to judge when it moves. This version keeps the checklist from the first edition but adds a reason under each item, so you can decide what fits your own risk. Check items off as you go.
 
 > [!NOTE]
 > This guide is for everyday users who want sensible privacy and security. If someone with resources may be targeting you, go to [Lockdown Mode](#lockdown-mode) first, then read the further reading at the end.

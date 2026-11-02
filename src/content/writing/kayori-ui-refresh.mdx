@@ -15,7 +15,7 @@ import CaseGraph from "../../components/feature/kayori/CaseGraph.astro";
 import NotesStudio from "../../components/feature/kayori/NotesStudio.astro";
 import Findings from "../../components/feature/kayori/Findings.astro";
 
-<p class="dropcap">Last October I wrote that Kayori should be an analyst's notebook, not a dashboard. At the time it had a command line, a message bus and a plan. It had no database and no interface. A year later it has both, and on 3 and 4 October I shipped a refresh of the whole interface.</p>
+<p class="dropcap">Last October I wrote that Kayori should be an analyst's notebook, not a dashboard. At the time it had a command line, a message bus and a plan. It had no database and no interface. A year later it has both, and on 3 and October 4 I shipped a refresh of the whole interface.</p>
 
 Kayori is my self-hosted workstation for open-source intelligence (OSINT): information anyone can legally collect from public sources. This post walks through one working day in the refreshed interface, in the order an analyst meets it: the feed, triage, the case, the graph, and the findings at the end. Along the way I explain why each screen looks the way it does.
 
@@ -35,19 +35,19 @@ The rest grew from the foundation I described last year:
 - **Refiners** are what I called "processors" last year: instructions for a language model that reads an item linked to a case and writes back a note and structured fields.
 - **The case graph** holds the people, organizations, domains, addresses and documents in a case, and the relationships between them.
 
-By September all of that worked. It was also hard to look at for long. The interface had grown one feature at a time, on a dark console theme. The dashboard opened with a large header and five metrics, each in its own accent colour. The feed packed kind, platform, two sort fields, search and a result count into one crowded row. Source names showed as internal identifiers in capitals. Nothing was broken, but everything asked for attention at once.
+By September all of that worked. It was also hard to look at for long. The interface had grown one feature at a time, on a dark console theme. The dashboard opened with a large header and five metrics, each in its own accent color. The feed packed kind, platform, two sort fields, search and a result count into one crowded row. Source names showed as internal identifiers in capitals. Nothing was broken, but everything asked for attention at once.
 
 ## The rules I set first
 
 Before I changed a screen, I wrote down a short set of rules. Each one answers a problem from that list.
 
-- **One accent colour, and it means "this one".** The selected row, the current tab, the selected node. It is never decoration. Status always comes with a word, so colour never carries meaning alone.
+- **One accent color, and it means "this one".** The selected row, the current tab, the selected node. It is never decoration. Status always comes with a word, so color never carries meaning alone.
 - **Light and dark are equal.** Same layout, same roles, two mappings. The theme follows the system until you choose otherwise.
 - **Two typefaces with two jobs.** A plain sans serif for controls. A reading serif at 16 pixels for anything a person has to read closely: source text and notes.
 - **No text smaller than 12 pixels.** Metadata had crept down to 10.
 - **Flat surfaces.** Thin borders separate things. Only an overlay, such as a dialog, gets a shadow.
 
-I drew two directions. One kept the old cyan accent and saved red, amber and green for status. The other was neutral grey with one red accent. I shipped the second. It was quieter, and on a screen you look at for hours, quiet wins.
+I drew two directions. One kept the old cyan accent and saved red, amber and green for status. The other was neutral gray with one red accent. I shipped the second. It was quieter, and on a screen you look at for hours, quiet wins.
 
 The first pass followed the prototype closely, and it was too generous. Rows had room to breathe and the header had a description line, but at a normal window size I could see only a few items at a time. Triage is a scanning job. So I measured, cut the header down, and tightened the rows. Then I measured again.
 
@@ -166,7 +166,7 @@ Three decisions shaped the studio:
 
 ## How I checked it
 
-Each part of the refresh went through the same steps: a written design system, a clickable prototype with invented data, and then the change in the real app. I checked every screen at three widths, 1440, 1024 and 390 pixels, in both themes. The checks covered text contrast, keyboard focus and horizontal overflow. Automated browser tests cover the new behaviour, such as Back returning focus to the right row and a failed save keeping its text.
+Each part of the refresh went through the same steps: a written design system, a clickable prototype with invented data, and then the change in the real app. I checked every screen at three widths, 1440, 1024 and 390 pixels, in both themes. The checks covered text contrast, keyboard focus and horizontal overflow. Automated browser tests cover the new behavior, such as Back returning focus to the right row and a failed save keeping its text.
 
 The figures on this page follow the same rules. Each one works with a keyboard and a screen reader. Without JavaScript, each one shows its finished state. With reduced motion turned on, nothing animates.
 

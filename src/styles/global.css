@@ -199,7 +199,7 @@ main:focus, [tabindex="-1"]:focus { outline: none; }
 .check .why { display: block; font-size: 15px; color: var(--muted); margin-top: 2px; font-weight: 400; }
 .check:has(input:checked) .setting { color: var(--muted); }
 
-/* code (Shiki dual themes: colours come from --shiki-light / --shiki-dark) */
+/* code (Shiki dual themes: colors come from --shiki-light / --shiki-dark) */
 pre { background: var(--surface); border: 1px solid var(--line); padding: var(--s4); overflow-x: auto; font: 14px/1.6 var(--mono); margin: var(--s5) 0; tab-size: 2; }
 pre code { background: none; border: 0; padding: 0; font-size: inherit; line-height: inherit; overflow-wrap: normal; }
 pre.astro-code { background-color: var(--surface) !important; }
@@ -332,7 +332,7 @@ pre.astro-code { background-color: var(--surface) !important; }
   a { color: inherit; }
 }
 
-/* Redaction bar (src/components/Redacted.astro). A solid block in the text colour, sized in characters. */
+/* Redaction bar (src/components/Redacted.astro). A solid block in the text color, sized in characters. */
 .redacted { display: inline-block; width: 8ch; height: 0.95em; vertical-align: -0.12em; background: var(--text); margin: 0 0.1em; }
 .redacted--s { width: 4ch; }
 .redacted--l { width: 14ch; }

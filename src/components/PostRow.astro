@@ -7,7 +7,7 @@ const feature = post.data.layout === "feature";
 ---
 <li class="row" data-pillar={post.data.pillar}>
   <span class="when">
-    <time datetime={isoDate(d)}>{fmtDate(d).padStart(11, "0")}</time>
+    <time datetime={isoDate(d)}>{fmtDate(d)}</time>
     <span class={feature ? "tag feature" : "tag"}>{feature ? "Feature · " : ""}{PILLARS[post.data.pillar]}</span>
   </span>
   <span>

@@ -21,6 +21,6 @@ export async function GET(context: APIContext) {
       categories: [PILLARS[p.data.pillar], ...p.data.tags],
     })),
     xmlns: { atom: "http://www.w3.org/2005/Atom" },
-    customData: `<language>en</language><atom:link href="${SITE.url}/rss.xml" rel="self" type="application/rss+xml"/>`,
+    customData: `<language>en-us</language><atom:link href="${SITE.url}/rss.xml" rel="self" type="application/rss+xml"/>`,
   });
 }

@@ -111,7 +111,7 @@ npm run test:e2e
 
 Each plan keeps a running record of verification: the exact commands, focused ones while debugging and full ones at the end, and whether they passed. Pull request descriptions end with the same block. It is a ledger, and it is the first thing I read.
 
-One of these rules came from a bad evening. On 1 April an agent made three commits in a row to stabilize the same group of watchlist browser tests. Twenty minutes after the last one, it changed the local Playwright worker setting to match CI. The rule now says: if CI runs with two workers, local verification runs with two workers, from a fresh server start. Flaky tests are the worst thing to give an agent. Each "fix" looks reasonable, and none of them is the fix.
+One of these rules came from a bad evening. On April 1 an agent made three commits in a row to stabilize the same group of watchlist browser tests. Twenty minutes after the last one, it changed the local Playwright worker setting to match CI. The rule now says: if CI runs with two workers, local verification runs with two workers, from a fresh server start. Flaky tests are the worst thing to give an agent. Each "fix" looks reasonable, and none of them is the fix.
 
 When there is a bug, the fix spec asks for a test that reproduces the failure that started the investigation. A test that would have caught the bug is worth more than a test of the new code.
 

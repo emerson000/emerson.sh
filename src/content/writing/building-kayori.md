@@ -88,7 +88,7 @@ The model's stack was not wrong. It was a stack for a company with a platform te
 
 ## Version two: one binary and a mesh
 
-On 7 October I started again, in Rust. The rework keeps the jobs from the table above and changes the shape of the system.
+On October 7 I started again, in Rust. The rework keeps the jobs from the table above and changes the shape of the system.
 
 These are the principles I wrote down for it:
 

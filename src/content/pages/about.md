@@ -9,7 +9,7 @@ I am a technology and security professional. By day I run business systems for a
 ## What I work on
 
 Security
-: Identity, backups, incident response and hardening, practised on my own infrastructure.
+: Identity, backups, incident response and hardening, practiced on my own infrastructure.
 
 Intelligence
 : Open-source intelligence methods and tooling, and structured analytic techniques.

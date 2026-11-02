@@ -8,7 +8,7 @@ layout: standard
 toc: true
 ---
 
-On 10 October 2026 I removed passwords from the single sign-on service for my independent project, Covert Signals. No sign-in flow asks for a password now. No flow sets one or accepts one.
+On October 10, 2026, I removed passwords from the single sign-on service for my independent project, Covert Signals. No sign-in flow asks for a password now. No flow sets one or accepts one.
 
 This post covers the decisions behind that change. The configuration matters less than the trade-offs. Every choice here gives something up, and I want to be clear about what.
 
@@ -101,7 +101,7 @@ The first design said "an email code is never sufficient alone". That was strict
 
 The cutover made the cost visible. Several accounts held only a confirmed email-code device. Under the new rules, they were refused before any code was sent. I had seen this in the audit and had planned to send each of those people a recovery link. What I had not asked was whether locking them out served the goal. It didn't.
 
-So on 10 October I changed one rule:
+So on October 10 I changed one rule:
 
 | The account has | Sign-in |
 |---|---|

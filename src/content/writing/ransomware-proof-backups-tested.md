@@ -10,7 +10,7 @@ toc: true
 
 Most backup advice says "make your backups immutable". Fewer people check that the claim holds when someone actually attacks it. Before I moved the backups for my independent project, Covert Signals, to a new tool, I wanted proof, not a feature list.
 
-So I ran a proof of concept on 22 September 2026. I gave myself five questions, tried to break the setup in the ways ransomware would, and wrote down what happened. This post is that test: the questions, the method, the results, and the controls that went into production.
+So I ran a proof of concept on September 22, 2026. I gave myself five questions, tried to break the setup in the ways ransomware would, and wrote down what happened. This post is that test: the questions, the method, the results, and the controls that went into production.
 
 ## The setup in one paragraph
 
@@ -106,7 +106,7 @@ B2 refused. The command exited with status 1 because the key had no delete permi
 
 This is the test that matters most. A restricted key is only one layer. If an attacker gets an account-wide key, permissions alone won't save you.
 
-I took an existing admin key that has `deleteFiles`, `deleteBuckets` and `bypassGovernance`, and tried to permanently delete the same file version. B2 returned `Access Denied`. The read afterwards succeeded.
+I took an existing admin key that has `deleteFiles`, `deleteBuckets` and `bypassGovernance`, and tried to permanently delete the same file version. B2 returned `Access Denied`. The read afterward succeeded.
 
 So compliance retention blocked deletion by a caller that held every normal delete permission and the governance bypass. That is the property I wanted.
 
@@ -217,7 +217,7 @@ b2 key create \
 
 The rest of the design did not change. On a fixed schedule, the platform and the databases produce their own backup files: application-aware database dumps and storage archives, never live data directories. The backup job refuses any required file that is missing, empty or more than two hours old. It then snapshots each source and writes a manifest that ties every snapshot in the run to one run ID. A run counts as successful only when that manifest snapshot exists. Restores always go to an empty staging directory first, never straight into live paths.
 
-The production backups went live on 23 September, the day after the test, behind a gate: one manual backup, one isolated restore whose file hashes match the manifest, and only then the timers.
+The production backups went live on September 23, the day after the test, behind a gate: one manual backup, one isolated restore whose file hashes match the manifest, and only then the timers.
 
 ## What I'd tell someone doing this
 

@@ -149,7 +149,7 @@ const conns = (nid: string) =>
   :global([data-scrolly][data-state~="whois"]) [data-at="whois"] { visibility: visible; opacity: 1; }
 
   /* Focus on the certificate: everything it does not touch steps back.
-     Text keeps the muted colour, so it still meets contrast. */
+     Text keeps the muted color, so it still meets contrast. */
   :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-node:not([data-near]) .kg-dot { border-style: dashed; color: var(--muted); }
   :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-edges line:not([data-near]) { stroke-dasharray: 3 3; }
   :global([data-scrolly][data-state~="focus"]) .kg:not([data-user]) .kg-edges line[data-near] { stroke: var(--accent); stroke-width: 2.5; }

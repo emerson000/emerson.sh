@@ -22,7 +22,7 @@ interface Props {
   markerHour?: number;
   markerLabel?: string;
 }
-const { id = "br", label = "", day = "21 Oct, UTC", markerHour = 14, markerLabel = "Fix released" } = Astro.props;
+const { id = "br", label = "", day = "Oct 21, UTC", markerHour = 14, markerLabel = "Fix released" } = Astro.props;
 const markerPct = (markerHour / 24) * 100;
 const status = [
   ["wall", "Edge allow-list"],
@@ -94,7 +94,7 @@ const status = [
   :global([data-scrolly][data-state~="wall"]) .br-wall { opacity: 1; }
   /* hold: the agent's permission check */
   :global([data-scrolly][data-state~="hold"]) .br-flag { opacity: 1; }
-  /* patched: solid, in the text colour */
+  /* patched: solid, in the text color */
   :global([data-scrolly][data-state~="patch-core"]) .br-ring[data-ring="inner"] { stroke: var(--text); stroke-width: 3; }
   :global([data-scrolly][data-state~="patch-core"]) .br-label[data-ring="inner"] { fill: var(--text); }
   :global([data-scrolly][data-state~="patch-core"]) .br-dot[data-dot="core"] { fill: var(--text); stroke: var(--text); }

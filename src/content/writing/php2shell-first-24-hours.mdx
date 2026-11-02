@@ -13,7 +13,7 @@ import BlastRadius from "../../components/feature/BlastRadius.astro";
 import Pull from "../../components/feature/Pull.astro";
 import Redacted from "../../components/Redacted.astro";
 
-<p class="dropcap">On Tuesday, 20 October 2026, details leaked of two flaws in PHP, the language behind most of the websites in the world. Researchers called the pair PHP2Shell (CVE-2026-109618 and CVE-2026-109619, both rated critical at 9.2 out of 10). Each one is a remote code execution flaw, or RCE: a stranger on the internet can send a request and run their own commands on your server, with no password. The PHP project said fixed versions would ship the next day at 14:00 UTC. Security vendors were already reporting attack attempts.</p>
+<p class="dropcap">On Tuesday, October 20, 2026, details leaked of two flaws in PHP, the language behind most of the websites in the world. Researchers called the pair PHP2Shell (CVE-2026-109618 and CVE-2026-109619, both rated critical at 9.2 out of 10). Each one is a remote code execution flaw, or RCE: a stranger on the internet can send a request and run their own commands on your server, with no password. The PHP project said fixed versions would ship the next day at 14:00 UTC. Security vendors were already reporting attack attempts.</p>
 
 I run a small set of servers for <Redacted size="l" />. On one of them, two services run PHP, and that morning anyone on the internet could reach both. This is the first day of the response, in the order I did things. The order mattered more than the speed.
 
@@ -34,12 +34,12 @@ There was also no complete workaround. The interim advice was to turn off one PH
 
 Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. In the diagram, red dots run the flawed PHP, hollow dots run no PHP, and solid dark dots are patched. The dashed circle is the allow-list at the reverse proxy, the server that receives every request before the apps do.
 
-<Scrolly state="php rank wall ini release second patch-core patch-app" progress={0.85} stepsLabel="Timeline of 21 October">
+<Scrolly state="php rank wall ini release second patch-core patch-app" progress={0.85} stepsLabel="Timeline of October 21">
   <BlastRadius slot="graphic" label="20:24 UTC" markerHour={14} markerLabel="PHP fix">
     Rings are ordered by blast radius: whoever controls the inner ring controls everything outside it.
   </BlastRadius>
 
-  <Step label="20 Oct" title="The leak" progress={0} describe="all services are grey; nothing is ranked yet.">
+  <Step label="Oct 20" title="The leak" progress={0} describe="all services are gray; nothing is ranked yet.">
 
   Details of two PHP flaws leak. The PHP project announces an out-of-band security release for 14:00 UTC the next day. Until then there is no patch, only settings that lower the risk.
 
@@ -164,7 +164,7 @@ Four things to check before you trust a rule like this:
 
 The same day I also sent a short notice to the people who use these services. It said three things: you are safe, you need to do nothing, and expect scam emails. Here it is, lightly edited for this page.
 
-<Pull label="The notice, 21 October 2026" caption="Sources given with the notice: the PHP project and W3Techs.">
+<Pull label="The notice, October 21, 2026" caption="Sources given with the notice: the PHP project and W3Techs.">
 
 On October 20, details leaked about a serious flaw in PHP. PHP is software that runs most of the websites in the world. The flaw lets attackers take control of a website without a password, and attacks already started.
 
@@ -195,8 +195,8 @@ What I left out matters as much as what I put in. There are no version numbers, 
 
 ## Sources
 
-- PHP project, "Upcoming Critical PHP Security Release", 20 October 2026, as quoted on the [oss-security mailing list](https://www.openwall.com/lists/oss-security/2026/10/20/34).
-- Help Net Security, [PHP2Shell vulnerabilities patched (CVE-2026-109618, CVE-2026-109619)](https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/), 21 October 2026.
-- Qualys, [PHP announces critical security release for two vulnerabilities](https://blog.qualys.com/vulnerabilities-threat-research/2026/10/20/php-announces-critical-security-release-for-two-vulnerabilities), 20 October 2026.
+- PHP project, "Upcoming Critical PHP Security Release", October 20, 2026, as quoted on the [oss-security mailing list](https://www.openwall.com/lists/oss-security/2026/10/20/34).
+- Help Net Security, [PHP2Shell vulnerabilities patched (CVE-2026-109618, CVE-2026-109619)](https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/), October 21, 2026.
+- Qualys, [PHP announces critical security release for two vulnerabilities](https://blog.qualys.com/vulnerabilities-threat-research/2026/10/20/php-announces-critical-security-release-for-two-vulnerabilities), October 20, 2026.
 - GitHub, [meta API](https://api.github.com/meta), for webhook source ranges.
 - W3Techs, [usage statistics of PHP](https://w3techs.com/technologies/details/pl-php).

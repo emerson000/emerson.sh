@@ -18,7 +18,7 @@ const current = (href: string) => (path === href ? "page" : path.startsWith(href
         {links.map((l) => <li><a href={l.href} aria-current={current(l.href)}>{l.label}</a></li>)}
       </ul>
     </nav>
-    <div class="theme-switch" role="group" aria-label="Colour theme" hidden>
+    <div class="theme-switch" role="group" aria-label="Color theme" hidden>
       <button type="button" data-theme-choice="auto" aria-pressed="true" aria-label="System theme" title="System theme">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><rect x="1.5" y="2.5" width="13" height="8.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14h5M8 11v3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
       </button>

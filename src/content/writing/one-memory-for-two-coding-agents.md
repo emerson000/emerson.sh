@@ -12,7 +12,7 @@ I use two coding agents every day: Claude Code and Codex. Both are good. Both fo
 
 So I kept repeating myself. Which package manager I use. Which machine runs what. Why we chose one library over another. Which error message means which fix. A fact that one agent learned on Tuesday was gone for the other agent on Wednesday.
 
-On 16 October I designed and built **fact-store** to fix this. It gives both agents one shared, durable memory. This post covers the design, the trust model, how facts get into a session, what the agents saved in the first week, and what went wrong.
+On October 16 I designed and built **fact-store** to fix this. It gives both agents one shared, durable memory. This post covers the design, the trust model, how facts get into a session, what the agents saved in the first week, and what went wrong.
 
 ## What success looks like
 
@@ -119,7 +119,7 @@ Tools alone don't change behavior. The installer writes a marked block into each
 
 ## What the agents saved in the first week
 
-From 17 October to 23 October, the agents created 245 facts. I don't show the facts themselves here, because many name my machines and preferences. The counts are enough to show the pattern.
+From October 17 to October 23, the agents created 245 facts. I don't show the facts themselves here, because many name my machines and preferences. The counts are enough to show the pattern.
 
 | Category | Facts |
 |---|---|
@@ -145,7 +145,7 @@ One more thing surprised me. No fact has been reinforced yet. I expected near-du
 
 ## What went wrong
 
-The design, the plan and the build all happened on 16 October. The core came together in about ten commits. Before I turned it on for real, one last commit fixed five problems.
+The design, the plan and the build all happened on October 16. The core came together in about ten commits. Before I turned it on for real, one last commit fixed five problems.
 
 **Corrections reinforced the fact they were meant to replace.** The dedupe rule said: if a new fact is at least 85% similar to an existing one in the same category and project, reinforce the old fact instead of adding a new one. But "the API listens on port 8080" and "the API listens on port 8081" are more than 85% similar. A correction made the wrong fact more trusted. The fix adds a second test: the two facts must make the same claim. They must have the same numbers, the same negations, and one must contain the other's key words. If not, fact-store saves the new fact and returns a `possible_duplicate_of` hint, and the instruction block tells the agent to supersede or dispute the old one.
 

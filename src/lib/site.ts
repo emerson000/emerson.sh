@@ -53,8 +53,8 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-/** 24 Jan 2026. Dates from YAML are midnight UTC, so read them in UTC. */
-export const fmtDate = (d: Date) => `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+/** Jan 24, 2026. Dates from YAML are midnight UTC, so read them in UTC. */
+export const fmtDate = (d: Date) => `${MON[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 export const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 /** Minutes to read, at 230 words a minute, ignoring code fences and markup. */

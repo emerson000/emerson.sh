@@ -4,7 +4,7 @@ export const SITE = {
   name: "Emerson Stewart",
   url: "https://emerson.sh",
   description:
-    "Technology and security professional. I run business systems by day, and build security and intelligence tools through Covert Signals, my independent project.",
+    "Technology and security professional. I run business systems by day and Covert Signals, my independent security and intelligence project, on the side.",
   // Placeholder until Emerson confirms the address.
   email: "hello@emerson.sh",
   securityEmail: "security@emerson.sh",

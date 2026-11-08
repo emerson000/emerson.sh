@@ -11,7 +11,7 @@ toc: true
 Most iPhone hardening guides are lists of switches. Lists age badly. Apple renames and moves menus every year, and a setting without its reason is hard to judge when it moves. This version keeps the checklist from the first edition but adds a reason under each item, so you can decide what fits your own risk. Check items off as you go.
 
 > [!NOTE]
-> This guide is for everyday users who want sensible privacy and security. If someone with resources may be targeting you, go to [Lockdown Mode](#lockdown-mode) first, then read the further reading at the end.
+> This guide is for everyday users who want sensible privacy and security. If someone with resources may be targeting you, go to [Lockdown Mode](#lockdown-mode) first, then see [Further reading](#further-reading) at the end.
 
 The settings are opinionated. Where a setting costs you a feature, the reason says so. Paths are for iOS 26.2 in English. If a label on your phone is different, use the search field at the top of the Settings app.
 
@@ -19,7 +19,7 @@ The settings are opinionated. Where a setting costs you a feature, the reason sa
 
 Update first. Several settings below only exist on current versions of iOS. Open `Settings` → `General` → `Software Update` and install anything that is waiting.
 
-Then decide what you are protecting against. For most people it is three things: a thief who gets the phone, apps and advertisers that collect more than they need, and scams that arrive by message. Each setting below helps with at least one of these.
+Then decide what you are protecting against. For most people that means a thief who gets the phone, apps and advertisers that collect more than they need, and scams that arrive by message. Each setting below helps with at least one of these.
 
 ## General
 
@@ -116,7 +116,7 @@ These settings protect you when someone else is holding your phone. They matter 
 - [ ] System Services → iPhone Analytics: `Off`\
   Stops location being included in the diagnostic data sent to Apple.
 - [ ] System Services → Routing & Traffic and Improve Maps: `Off`\
-  These send your movements to Apple to improve Maps. Useful to Apple, not needed by you.
+  These send your movements to Apple to improve Maps; you don't need them.
 - [ ] System Services → Status Bar Icon: `On`\
   Shows an arrow in the status bar when system services use your location, so you can see when it happens.
 
@@ -155,7 +155,7 @@ These are under the Security heading near the bottom of `Privacy & Security`.
 ### Other permissions
 
 - [ ] App Privacy Report: `On`\
-  Shows which apps used your camera, microphone, location, photos and contacts, and which domains they contacted, over the last seven days. You can't fix what you can't see.
+  Shows which apps used your camera, microphone, location, photos and contacts, and which domains they contacted, over the last seven days.
 - [ ] Photos, Contacts, Microphone, Camera, Bluetooth, Local Network: review each\
   Remove access from any app that does not need it. Where iOS offers limited access, such as selected photos or contacts, use it.
 - [ ] Safety Check: run it once\
@@ -198,7 +198,7 @@ These are under the Security heading near the bottom of `Privacy & Security`.
 `Settings` → `Apps` → `Safari`
 
 - [ ] Search Engine: `DuckDuckGo`\
-  Your searches are not tied to an advertising profile. The first edition put this under Search; it lives here, under Safari.
+  Your searches are not tied to an advertising profile.
 - [ ] Search Engine Suggestions and Safari Suggestions: `Off`\
   Stops what you type in the address bar going to the search engine and to Apple as you type it.
 - [ ] Prevent Cross-Site Tracking: `On`\
@@ -267,11 +267,11 @@ These are under the Security heading near the bottom of `Privacy & Security`.
 - [ ] SIM PIN: `On`\
   If your SIM is removed and put in another phone, it can't be used to receive your calls and text-message codes without the PIN. Get your carrier's default PIN first. Three wrong guesses lock the SIM until you enter the PUK code from your carrier.
 
-## Habits that matter as much as settings
+## Habits
 
 - **Restart the phone now and then.** After a restart, your data stays encrypted until you type your passcode. Some spyware does not survive a restart. Security researchers found that since iOS 18.1, an iPhone that has not been unlocked for about three days restarts by itself, which has the same effect.
 - **Install updates the day they arrive.** Automatic updates can take days to reach you. When Apple says a flaw "may have been actively exploited", update by hand.
-- **Delete apps you don't use.** Every app is code you trust with some access. Fewer apps, less to go wrong.
+- **Delete apps you don't use.** Every app is code you trust with some access.
 - **Use a password manager and passkeys.** Strong, unique passwords for every account matter more than any switch on this page.
 
 ## Lockdown Mode
@@ -304,11 +304,11 @@ The checklist above is for everyday risk. If you face a capable adversary, also 
 - **Fewer cloud services.** Every service you sign in to holds data that someone can request, subpoena or steal.
 - **Expert help.** The Electronic Frontier Foundation's Surveillance Self-Defense guide, linked below, is a good start. If you are a journalist or activist and think you are targeted, organizations such as Access Now run digital-security helplines.
 
-## What changed from the first edition
+## Changes from the first edition
 
 - Every setting now has a reason.
 - Added: Stolen Device Protection with `Always`, Lock Screen access, Wired Accessories, Background Security Improvements, Safari, Messages, notification previews, Find My, Advanced Data Protection, security keys, SIM PIN and Lockdown Mode.
-- Moved the search engine setting to Safari, where it actually lives.
+- Moved the search engine setting to Safari, where iOS puts it.
 - Updated paths for iOS 26: Siri is under `Apple Intelligence & Siri`, and app settings are under `Settings` → `Apps`.
 - Fixed typos, including "AirPlay & Continuity" and a duplicated update setting.
 

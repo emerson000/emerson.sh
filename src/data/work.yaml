@@ -3,7 +3,7 @@
 - name: Covert Signals
   kind: Project
   role: Founder
-  summary: Independent security intelligence, privacy and research.
+  summary: My independent security and intelligence project.
   description: "My independent project for security intelligence, privacy and research. It's where I study how information is collected, exposed and protected, and where most of the tools and writing on this site begin."
   links:
     - label: covertsignals.com
@@ -14,7 +14,7 @@
   kind: Product
   role: Founder
   status: In development
-  summary: A self-hosted OSINT workstation. In development.
+  summary: A self-hosted OSINT workstation, in development.
   description: An open-source-intelligence workstation that runs on your own hardware. One feed, cases, link graphs and language-model refiners in a single self-hosted install. Written in Rust.
   links:
     - label: The interface refresh

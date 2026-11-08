@@ -53,8 +53,11 @@ main:focus, [tabindex="-1"]:focus { outline: none; }
 /* ===== header / footer ===== */
 .site-head { border-bottom: 1px solid var(--line); }
 .site-head .wrap { display: flex; align-items: baseline; gap: var(--s5); padding-top: var(--s5); padding-bottom: var(--s4); flex-wrap: wrap; }
-.brand { font: 600 20px/1.2 var(--display); color: var(--text); text-decoration: none; margin-right: auto; letter-spacing: -0.01em; }
+.brand { display: block; color: var(--text); text-decoration: none; margin-right: auto; line-height: 0; }
 .brand:hover { color: var(--text); }
+/* Wordmark: 24px from ascender to baseline (identity system), so 142/140 of that tall. */
+.logo { display: block; height: 24.34px; width: auto; aspect-ratio: 1031 / 142; }
+.logo-dot { fill: var(--accent); }
 .nav ul { display: flex; gap: var(--s5); list-style: none; margin: 0; padding: 0; }
 .nav a { color: var(--muted); text-decoration: none; font-size: 15px; font-weight: 500; padding: var(--s1) 0; border-bottom: 2px solid transparent; }
 .nav a:hover { color: var(--text); }
@@ -307,6 +310,7 @@ pre.astro-code { background-color: var(--surface) !important; }
   body { font-size: 16.5px; }
   .site-head .wrap { gap: var(--s3); }
   .brand { width: 100%; }
+  .brand .logo { height: 21.3px; }
   .nav ul { gap: var(--s4); }
   .theme-switch { margin-left: auto; }
   .home-intro { padding-top: var(--s7); }

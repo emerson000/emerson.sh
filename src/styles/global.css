@@ -55,8 +55,9 @@ main:focus, [tabindex="-1"]:focus { outline: none; }
 .site-head .wrap { display: flex; align-items: baseline; gap: var(--s5); padding-top: var(--s5); padding-bottom: var(--s4); flex-wrap: wrap; }
 .brand { display: block; color: var(--text); text-decoration: none; margin-right: auto; line-height: 0; }
 .brand:hover { color: var(--text); }
-/* Wordmark: 24px from ascender to baseline (identity system), so 142/140 of that tall. */
-.logo { display: block; height: 24.34px; width: auto; aspect-ratio: 1031 / 142; }
+/* Wordmark: 24px from ascender to baseline (identity system); the viewBox is 159 units tall
+   for 140 from ascender to baseline, because it includes 8 units of clear space. */
+.logo { display: block; height: 27.26px; width: auto; aspect-ratio: 1055.5 / 159; }
 .logo-dot { fill: var(--accent); }
 .nav ul { display: flex; gap: var(--s5); list-style: none; margin: 0; padding: 0; }
 .nav a { color: var(--muted); text-decoration: none; font-size: 15px; font-weight: 500; padding: var(--s1) 0; border-bottom: 2px solid transparent; }
@@ -310,7 +311,7 @@ pre.astro-code { background-color: var(--surface) !important; }
   body { font-size: 16.5px; }
   .site-head .wrap { gap: var(--s3); }
   .brand { width: 100%; }
-  .brand .logo { height: 21.3px; }
+  .brand .logo { height: 23.85px; }
   .nav ul { gap: var(--s4); }
   .theme-switch { margin-left: auto; }
   .home-intro { padding-top: var(--s7); }

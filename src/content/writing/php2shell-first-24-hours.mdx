@@ -1,63 +1,62 @@
 ---
 title: "PHP2Shell: the first 24 hours of a critical RCE"
-description: "A critical flaw in PHP, two exposed services and no patch yet. What I closed first, why the order mattered, and the notice I sent."
+description: "Incident timeline, containment and user notice for PHP2Shell (CVE-2026-109618, CVE-2026-109619) on two internet-facing PHP services."
 date: 2026-10-28
 pillar: security
 tags: [incident-response, php, vulnerability-management, reverse-proxy]
 layout: feature
 ---
-
 import Scrolly from "../../components/feature/Scrolly.astro";
 import Step from "../../components/feature/Step.astro";
 import BlastRadius from "../../components/feature/BlastRadius.astro";
 import Pull from "../../components/feature/Pull.astro";
 import Redacted from "../../components/Redacted.astro";
 
-<p class="dropcap">On Tuesday, October 20, 2026, details leaked of two flaws in PHP, the language behind most of the websites in the world. Researchers called the pair PHP2Shell (CVE-2026-109618 and CVE-2026-109619, both rated critical at 9.2 out of 10). Each one is a remote code execution flaw, or RCE: a stranger on the internet can send a request and run their own commands on your server, with no password. The PHP project said fixed versions would ship the next day at 14:00 UTC. Security vendors were already reporting attack attempts.</p>
+<p class="dropcap">On Tuesday, October 20, 2026, two PHP vulnerabilities leaked ahead of the scheduled coordinated disclosure. PHP runs about 70% of websites, by W3Techs' count. The vulnerabilities were CVE-2026-109618 and CVE-2026-109619, together known as PHP2Shell. Both are remote code execution vulnerabilities, or RCE. An attacker can use either one to run their own commands on your server without a password. The PHP project said fixed versions would ship the next day at 14:00 UTC. Security vendors were already reporting attack attempts.</p>
 
-I run a small set of servers for <Redacted size="l" />. On one of them, two services run PHP, and that morning anyone on the internet could reach both. This is the first day of the response, in the order I did things. The order mattered more than the speed.
+I run several servers for <Redacted size="l" />. One of them had two internet-facing services that use PHP. Both were on fixed PHP a little over nine hours after I started, and an allow-list at the reverse proxy covered most of the time before that.
 
-## What was exposed
+## Incident Scope
 
-Two services on the same host ran PHP:
+Two services on the host ran PHP and faced the internet. <Redacted /> is the self-hosted control plane that deploys every other app on the host, and anyone on the internet could reach its PHP login page. The other was a project-management app behind single sign-on (SSO), except for one API route that bypassed it.
 
-- **<Redacted />**, the self-hosted platform that deploys every other app on the host. Its sign-in page answered anyone on the internet.
-- **A project-management app.** Every page sat behind my single sign-on (SSO) gate, except one API route that skipped it.
+The control plane was the highest risk. It has the Docker socket, the host's SSH keys and the secrets of every app it deploys. Exploiting PHP2Shell against the control plane would give full control of the server. Code execution in the project app would give an attacker that app, its database and a foothold on the internal network.
 
-The two were not equal risks. <Redacted /> holds the Docker socket, the host's SSH keys and the secrets of every app it deploys. The Docker socket is the control channel for all the containers on the host. So whoever runs code inside <Redacted /> controls the whole host. Code execution in the project app would give an attacker that app, its database and a foothold on the internal network. Bad, but smaller.
+Nothing else on the host ran PHP.
 
-Nothing else on the host ran PHP, and the host itself had none.
+PHP patches had not yet shipped. The common advice online was to turn off session upload progress in PHP and to limit file uploads. I turned off upload progress at 11:24, after the allow-list was already up.
 
-There was also no complete workaround. The interim advice was to turn off one PHP feature, session upload progress, and to limit file uploads. Both lowered the risk. Neither removed it.
+## Timeline
 
-## The day, hour by hour
-
-Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. In the diagram, red dots run the flawed PHP, hollow dots run no PHP, and solid dark dots are patched. The dashed circle is the allow-list at the reverse proxy, the server that receives every request before the apps do.
+Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. In the diagram, red dots run the flawed PHP, hollow dots run no PHP, and solid dark dots are patched. The dashed circle is the allow-list at the reverse proxy, the service that sits between the internet and the apps.
 
 <Scrolly state="php rank wall ini release second patch-core patch-app" progress={0.85} stepsLabel="Timeline of October 21">
+
   <BlastRadius slot="graphic" label="20:24 UTC" markerHour={14} markerLabel="PHP fix">
-    Rings are ordered by blast radius: whoever controls the inner ring controls everything outside it.
+
+Rings are ordered by blast radius: whoever controls the inner ring controls everything outside it.
+
   </BlastRadius>
 
-  <Step label="Oct 20" title="The leak" progress={0} describe="all services are gray; nothing is ranked yet.">
+  <Step label="Oct 20" title="Vulnerabilities Leaked" progress={0} describe="all services are gray; nothing is ranked yet.">
 
-  Details of two PHP flaws leak. The PHP project announces an out-of-band security release for 14:00 UTC the next day. Until then there is no patch, only settings that lower the risk.
+  Details of two PHP flaws leak. The PHP project announces a security release for 14:00 UTC the next day.
 
   </Step>
 
-  <Step label="11:10 UTC" title="Look before you touch" state="php" progress={0.465} describe="the two PHP services turn red; the other services are hollow.">
+  <Step label="11:10 UTC" title="Read-Only Inspection" state="php" progress={0.465} describe="the two PHP services turn red; the other services are hollow.">
 
   I start with a read-only inspection: which containers run PHP, which PHP settings are on, how the reverse proxy routes traffic, and which ports listen. Two services run PHP. Nothing else does.
 
   </Step>
 
-  <Step label="11:10–11:20 UTC" title="Rank by blast radius, not by count" state="php rank" progress={0.47} describe="the inner ring, the control plane, is highlighted.">
+  <Step label="11:10–11:20 UTC" title="Risk Prioritization" state="php rank" progress={0.47} describe="the inner ring, the control plane, is highlighted.">
 
-  Two services, but not two equal risks. The deployment platform holds the Docker socket. If it falls, every app falls with it. It goes first. The project app comes second.
+  The deployment platform holds the Docker socket, so if it falls, every app on the host falls with it. It goes first and the project app second.
 
   </Step>
 
-  <Step label="~11:20 UTC" title="Close it at the edge" state="php rank wall" progress={0.472} describe="a dashed wall appears around all three rings.">
+  <Step label="~11:20 UTC" title="Proxy Allow-List Deployed" state="php rank wall" progress={0.472} describe="a dashed wall appears around all three rings.">
 
   There is no patch, so I take away reach instead. Two rule files at the reverse proxy take effect without a restart. The dashboard now answers only my workstation. Webhooks from my Git server and from GitHub still get through, each on its own path. The API route that skipped sign-in now goes through the SSO gate.
 
@@ -65,13 +64,13 @@ Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. 
 
   </Step>
 
-  <Step label="11:24 UTC" title="Turn off what you can" state="php rank wall ini" progress={0.475} describe="the status list shows upload progress off.">
+  <Step label="11:24 UTC" title="Upload Progress Disabled" state="php rank wall ini" progress={0.475} describe="the status list shows upload progress off.">
 
-  I turn off session upload progress in the deployment platform with a small PHP settings file, and recreate its container. PHP now reports the setting as Off. This lowers the risk. It does not remove it.
+  I turn off session upload progress in the deployment platform with a small PHP settings file, and recreate its container. PHP now reports the setting as Off.
 
   </Step>
 
-  <Step label="~11:29 UTC" title="The agent stops and asks" state="php rank wall ini hold" progress={0.479} describe="a flag reads: agent waits for me.">
+  <Step label="~11:29 UTC" title="Rollback Held for Approval" state="php rank wall ini hold" progress={0.479} describe="a flag reads: agent waits for me.">
 
   I do this work with a coding agent. The recreated container comes up unhealthy: the deployment files on disk are for a newer release than the one that runs. The agent proposes to put back the older files and recreate the container again. Its permission check blocks that change and waits for me.
 
@@ -79,40 +78,39 @@ Times are UTC, from my notes. A tilde (~) marks a time I logged as approximate. 
 
   </Step>
 
-  <Step label="14:00 UTC" title="PHP ships the fix" state="php rank wall ini release" progress={0.583} describe="the timeline reaches the release marker.">
+  <Step label="14:00 UTC" title="PHP Fixes Released" state="php rank wall ini release" progress={0.583} describe="the timeline reaches the release marker.">
 
   PHP releases 8.2.35, 8.3.36, 8.4.27 and 8.5.12. Now I wait for the projects that package PHP. The deployment platform and the app image each have to ship a build on a fixed version.
 
   </Step>
 
-  <Step label="14:50–15:10 UTC" title="Check the second tier" state="php rank wall ini release second" progress={0.63} describe="the status list shows the second server checked.">
+  <Step label="14:50–15:10 UTC" title="Second Server Reviewed" state="php rank wall ini release second" progress={0.63} describe="the status list shows the second server checked.">
 
   Another server I run also has PHP. It is not published to the internet: there are no port forwards and no remote-access features turned on. An attacker would need a foothold inside the network first. I inspect it read-only: the PHP processes, their child processes and the logs I have. I find no sign of misuse.
 
   </Step>
 
-  <Step label="17:07–17:52 UTC" title="Patch the control plane" state="php rank wall ini release second patch-core" progress={0.744} describe="the inner ring and its dot turn solid: patched.">
+  <Step label="17:07–17:52 UTC" title="Control Plane Patched" state="php rank wall ini release second patch-core" progress={0.744} describe="the inner ring and its dot turn solid: patched.">
 
-  At 17:07 the project app redeploys without the route that skipped sign-in. That gap is now closed in the app's own configuration, not only at the proxy. At 17:52 the deployment platform upgrades to <Redacted /> <Redacted size="s" label="redacted version" />, built that day on PHP 8.4.27. The container is healthy.
+  At 17:07 the project app redeploys without the route that skipped sign-in. That gap is now closed in the app's own configuration as well as at the proxy. At 17:52 the deployment platform upgrades to <Redacted /> <Redacted size="s" label="redacted version" />, built that day on PHP 8.4.27. The container is healthy.
 
   </Step>
 
-  <Step label="18:16 UTC" title="Test the wall again" state="php rank wall ini release second patch-core" progress={0.761} describe="no change: the wall stays in place.">
+  <Step label="18:16 UTC" title="Allow-List Retested" state="php rank wall ini release second patch-core" progress={0.761} describe="no change: the wall stays in place.">
 
   The upgrade moved one internal service to a new name. My edge rule for it still pointed at the old name, so the proxy dropped that rule. I fix it, then test again from outside the allow-list. The dashboard, its live updates and its terminal all answer 403, and the webhooks still arrive.
 
-  An upgrade can quietly undo a mitigation. Test it again after every change.
-
   </Step>
 
-  <Step label="20:24 UTC" title="The last service patched" state="php rank wall ini release second patch-core patch-app" progress={0.85} describe="both rings and both PHP dots are solid: everything is patched, and the wall stays.">
+  <Step label="20:24 UTC" title="Project App Patched" state="php rank wall ini release second patch-core patch-app" progress={0.85} describe="both rings and both PHP dots are solid: everything is patched, and the wall stays.">
 
   The project app's maintainers publish their image again on PHP 8.3.36. I redeploy it. The container is healthy, every page and the API go to the sign-in page first, and upload progress stays off. Both PHP services now run fixed versions, a little over nine hours after I started.
 
   </Step>
+
 </Scrolly>
 
-## Closing it at the edge
+## Containment
 
 The allow-list did the most work for the least effort. It took about ten minutes, needed no patch and no restart, and stopped every request from an unknown address before PHP saw it.
 
@@ -153,20 +151,20 @@ http:
       tls: {}
 ```
 
-Four things to check before you trust a rule like this:
+### Allow-List Checks
 
-1. **The proxy must see the real client address.** If it only sees an internal address, an allow-list lets in everyone or no one. My workstation's single address matched, which proved the real addresses arrived.
-2. **Keep the paths that must stay open.** Webhooks from your Git server and from GitHub need their own routes. GitHub publishes its webhook source ranges at `api.github.com/meta`. Copy them when you write the rule, and refresh them later.
-3. **Plan for lockout.** If your own address changes, the dashboard answers 403 to you too. Know how to reach the server another way, and which line to edit.
-4. **Test from every side.** From the allowed address, from a refused one, and from each webhook source. Then test again after every upgrade.
+1. Confirm the proxy sees the real client address. If it only sees an internal address, an allow-list lets in everyone or no one. My workstation's single address matched, which proved the real addresses arrived.
+2. Give webhooks from your Git server and from GitHub their own routes. GitHub publishes its webhook source ranges at `api.github.com/meta`. Copy them when you write the rule, and refresh them later.
+3. If your own address changes, the dashboard answers 403 to you too. Know how to reach the server another way, and which line to edit.
+4. Test from the allowed address, from a refused one and from each webhook source, and test again after every upgrade.
 
-## The notice
+## User Notification
 
-The same day I also sent a short notice to the people who use these services. It said three things: you are safe, you need to do nothing, and expect scam emails. Here it is, lightly edited for this page.
+The same day I also sent a short notice to the people who use these services. It told them they were safe, that they did not need to do anything, and to expect scam emails. Here it is, lightly edited for this page.
 
 <Pull label="The notice, October 21, 2026" caption="Sources given with the notice: the PHP project and W3Techs.">
 
-On October 20, details leaked about a serious flaw in PHP. PHP is software that runs most of the websites in the world. The flaw lets attackers take control of a website without a password, and attacks already started.
+On October 20, details leaked about a serious flaw in PHP. PHP is software that runs most of the websites in the world. The flaw lets attackers take control of a website without a password, and attacks have already started.
 
 The services you use are safe. Your portal, chat and sign-in do not use PHP. I closed my two internal PHP tools to the internet within hours, and I found no sign of misuse. You do not have to do anything.
 
@@ -182,18 +180,13 @@ I will never ask for your password or send you a link to fix this. If a message 
 
 </Pull>
 
-What I left out matters as much as what I put in. There are no version numbers, no list of systems and no promise that nothing can ever go wrong. Most readers need to know one thing: do I have to act? The second paragraph answers that. The rest prepares them for what comes next, because the scam emails that follow a flaw like this reach far more people than the flaw itself.
+I left out version numbers, the list of systems and any promise that nothing can go wrong. Most readers only need to know whether they have to act, and the second paragraph answers that. The rest prepares them for the scam emails, which will reach far more of them than the flaw itself.
 
-## What I would do again
+## Conclusion
 
-1. **Look before you touch.** Ten minutes of read-only inspection told me what ran PHP, what was reachable and what was not. Every later step depended on it.
-2. **Rank by blast radius, not by count.** Two exposed services is not two equal problems. Close the one that controls everything else first.
-3. **Take away reach before you can remove the flaw.** An allow-list at the proxy needs no patch. It also stays useful after the patch: a deployment dashboard has no reason to be public.
-4. **Keep a person in the loop for changes to the control plane.** The agent was fast, and its proposed rollback was reasonable. Its permission check still stopped it and waited for me. That pause cost nothing.
-5. **Test the mitigation again after every change.** My own rule broke during the upgrade. A second test found it within half an hour.
-6. **Tell people early, in plain words.** Say whether they must act, and warn them about what follows.
+The proxy allow-list covered both services from about 11:20 until their patched builds went live at 17:52 and 20:24, and it is still in place. The 17:52 upgrade renamed an internal service and broke one of its rules, and the retest at 18:16 caught it.
 
-## Sources
+## References
 
 - PHP project, "Upcoming Critical PHP Security Release", October 20, 2026, as quoted on the [oss-security mailing list](https://www.openwall.com/lists/oss-security/2026/10/20/34).
 - Help Net Security, [PHP2Shell vulnerabilities patched (CVE-2026-109618, CVE-2026-109619)](https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/), October 21, 2026.

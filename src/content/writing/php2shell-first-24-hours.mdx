@@ -22,9 +22,7 @@ Two services on the host ran PHP and faced the internet. <Redacted /> is the sel
 
 The control plane was the highest risk. It has the Docker socket, the host's SSH keys and the secrets of every app it deploys. Exploiting PHP2Shell against the control plane would give full control of the server. Code execution in the project app would give an attacker that app, its database and a foothold on the internal network.
 
-Nothing else on the host ran PHP.
-
-PHP patches had not yet shipped. The common advice online was to turn off session upload progress in PHP and to limit file uploads. I turned off upload progress at 11:24, after the allow-list was already up.
+PHP patches had not yet shipped. The prevailing advice on Reddit and Hacker News was to turn off session upload progress in PHP and to limit file uploads. I turned off upload progress at 11:24, after the allow-list was already up.
 
 ## Timeline
 
@@ -46,7 +44,7 @@ Rings are ordered by blast radius: whoever controls the inner ring controls ever
 
   <Step label="11:10 UTC" title="Read-Only Inspection" state="php" progress={0.465} describe="the two PHP services turn red; the other services are hollow.">
 
-  I start with a read-only inspection: which containers run PHP, which PHP settings are on, how the reverse proxy routes traffic, and which ports listen. Two services run PHP. Nothing else does.
+  I start with a read-only investigation. I look for any containers with PHP, review PHP settings, and review reverse proxy routes.
 
   </Step>
 
@@ -58,7 +56,7 @@ Rings are ordered by blast radius: whoever controls the inner ring controls ever
 
   <Step label="~11:20 UTC" title="Proxy Allow-List Deployed" state="php rank wall" progress={0.472} describe="a dashed wall appears around all three rings.">
 
-  There is no patch, so I take away reach instead. Two rule files at the reverse proxy take effect without a restart. The dashboard now answers only my workstation. Webhooks from my Git server and from GitHub still get through, each on its own path. The API route that skipped sign-in now goes through the SSO gate.
+  There is no patch, so I restrict access in the interim. Two new rules at the reverse proxy take effect without a restart. The dashboard now answers only my workstation. Webhooks from my Git server and from GitHub still get through, each on its own path. The API route that skipped sign-in now goes through the SSO gate.
 
   Everyone else gets 403 Forbidden before the request reaches PHP. At about 11:22 I test from each source, and each one gets the answer it should.
 
@@ -112,7 +110,7 @@ Rings are ordered by blast radius: whoever controls the inner ring controls ever
 
 ## Containment
 
-The allow-list did the most work for the least effort. It took about ten minutes, needed no patch and no restart, and stopped every request from an unknown address before PHP saw it.
+The allow-list mitigated most of the risk. It took about ten minutes, needed no patch and no restart, and stopped every request from an unknown address before it reached PHP.
 
 I use Traefik as my reverse proxy. Traefik reads extra rules from files and picks them up without a restart, which is what made this a ten-minute fix. I left the existing routes alone and added one new file. It matches the same hostname at a higher priority, so its rules are checked first, and it puts an allow-list in front of the dashboard. Here is the pattern, with documentation addresses and an example domain:
 
@@ -168,7 +166,7 @@ On October 20, details leaked about a serious flaw in PHP. PHP is software that 
 
 The services you use are safe. Your portal, chat and sign-in do not use PHP. I closed my two internal PHP tools to the internet within hours, and I found no sign of misuse. You do not have to do anything.
 
-The rest of the internet is at risk. Many stores, blogs and other sites that you use will be slow to install the fix. Attackers will steal data from them and use it in fake emails for weeks or months.
+The rest of the internet is at risk. Many stores, blogs and other sites that you use will be slow to install the fix. Attackers will steal data from them and use it in fake emails.
 
 To stay safe:
 

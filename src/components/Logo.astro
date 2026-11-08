@@ -1,0 +1,10 @@
+---
+// The "Full stop" wordmark. Letters take currentColor; the square dot takes the accent (signal) color.
+import { LOGO_VIEWBOX, LOGO_LETTERS, LOGO_DOT } from "../lib/logo";
+interface Props { class?: string; title?: string }
+const { class: className, title = "emerson.sh" } = Astro.props;
+---
+<svg class:list={["logo", className]} viewBox={LOGO_VIEWBOX} role="img" aria-label={title} focusable="false">
+  <path fill="currentColor" d={LOGO_LETTERS}/>
+  <path class="logo-dot" d={LOGO_DOT}/>
+</svg>
